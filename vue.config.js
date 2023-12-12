@@ -5,6 +5,10 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const AutoImport = require('unplugin-auto-import/webpack')
 const Components = require('unplugin-vue-components/webpack')
 const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
+const path = require('path')
+const resolve = function (dir) {
+  return path.join(__dirname, dir);
+}
 
 module.exports = defineConfig({
   transpileDependencies: true,
@@ -25,7 +29,7 @@ module.exports = defineConfig({
   },
   configureWebpack: config => {
     const plugins = [
-      new BundleAnalyzerPlugin(),
+      // new BundleAnalyzerPlugin(),
       // AutoImport({
       //   resolvers: [ElementPlusResolver()],
       // }),
@@ -36,7 +40,19 @@ module.exports = defineConfig({
     config.plugins.push(...plugins);
     config.externals = {
       vue: 'Vue',
-      'element-plus': 'ElementPlus'
+      'element-plus': 'ElementPlus',
     }
   },
+  chainWebpack: config => {
+    config.module.rules.delete('svg');
+    config.module.rule('svg-sprite-loader').test(/\.svg$/)
+      .include
+      .add(resolve('src/icons/svg'))
+      .end()
+      .use('svg-sprite-loader')
+      .loader('svg-sprite-loader')
+      .options({
+        symbolId: 'icon-[name]'
+      })
+  }
 })
