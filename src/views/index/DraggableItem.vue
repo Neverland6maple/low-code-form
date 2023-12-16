@@ -2,22 +2,40 @@
 import { h } from 'vue';
 import render from '@/components/render/render.js'
 import draggable from "vuedraggable";
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
+
+const components = {
+  itemBtns(item, list, index) {
+    const { onCopyItem, onDeleteItem } = this.$attrs;
+    return [<span class="drawing-item-icon drawing-item-copy" title='删除' onClick={e => { onCopyItem(item, list); e.stopPropagation(); }}>
+      <el-icon >
+        <CopyDocument />
+      </el-icon>
+    </span>, <span class="drawing-item-icon drawing-item-delete" title='删除' onClick={e => { onDeleteItem(index, list); e.stopPropagation(); }}>
+      <el-icon >
+        <Delete />
+      </el-icon>
+    </span>]
+  }
+}
+
 const layouts = {
-  colItem(item) {
+  colItem(item, list, index) {
     const conf = item._config_;
+    const value = ref(conf.defaultValue);
     const { onActiveItem } = this.$attrs;
     const className = this.activeId === conf.formId ? 'drawing-item active-from-item' : 'drawing-item';
     return <el-col onClick={e => { onActiveItem(item); e.stopPropagation(); }} class={className} span={conf.span}>
       <el-form-item for={"stopPropagation"} label={conf.label}>
-        <render conf={conf}></render>
+        <render conf={conf} onInput={e => conf.defaultValue = e}></render>
       </el-form-item>
+      {components.itemBtns.apply(this, arguments)}
     </el-col>
   },
-  rowItem(item) {
+  rowItem(item, list, index) {
     const conf = item._config_;
     const className = this.activeId === conf.formId ? 'drawing-row-item active-from-item' : 'drawing-row-item';
-    const { onActiveItem } = this.$attrs;
+    const { onActiveItem, onCopyItem, onDeleteItem } = this.$attrs;
     conf.children = conf.children || [];
     const arr = reactive([]);
     return <el-col span={conf.span}>
@@ -28,30 +46,25 @@ const layouts = {
           style={{ display: item.type === 'flex' ? 'flex' : '' }}
           v-slots={{
             item: ({ element, index }) => {
-              return <draggable-item currentItem={element} onActiveItem={onActiveItem} activeId={this.activeId}></draggable-item>
-            },
-            default: () => { return null }
+              return <draggable-item currentItem={element} activeId={this.activeId} list={conf.children} index={index}
+                onActiveItem={onActiveItem} onCopyItem={onCopyItem} onDeleteItem={onDeleteItem}></draggable-item>
+            }
           }
           } >
         </draggable>
+        {components.itemBtns.apply(this, arguments)}
       </el-row>
     </el-col >
   }
 }
-function renderChildren(children) {
-  if (!Array.isArray(children)) return null;
-  return children.map((el, index) => {
-    // return layouts[el._config_.layout].call(this, context.conf)
-    return <draggable-item currentItem={el}></draggable-item>
-  })
-}
+
 export default {
-  props: ['currentItem', 'activeId'],
+  props: ['currentItem', 'activeId', 'list', 'index'],
   name: 'draggableItem',
   render(context) {
     // return <h1>text</h1>
     // return h('el-button', {}, this.conf._config_.tag)
-    return layouts[context.currentItem._config_.layout].call(context, context.currentItem);
+    return layouts[context.currentItem._config_.layout].call(context, context.currentItem, context.list, context.index);
   }
 }
 </script>

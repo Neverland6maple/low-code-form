@@ -6,6 +6,7 @@ export const inputComponents = [
       label: '单行文本',
       tag: "el-input",
       tagIcon: "input",
+      defaultValue: undefined,
     }
   },
   {

@@ -10,6 +10,14 @@
         <!-- 组件属性 -->
         <el-form v-show="activeName === 'field' && showField" label-width="90px">
           {{ activeData }}
+          <el-form-item label="组件类型">
+            <el-select v-model="activeData._config_.tagIcon" @change="tagChange">
+              <el-option-group v-for="group in tagList" :key="group.title" :label="group.title">
+                <el-option v-for="item in group.list" :key="item._config_.label" :label="item._config_.label"
+                  :value="item._config_.tagIcon" />
+              </el-option-group>
+            </el-select>
+          </el-form-item>
           <el-form-item label="标题">
             <el-input v-model="activeData._config_.label"></el-input>
           </el-form-item>
@@ -24,6 +32,9 @@
           </el-form-item>
           <el-form-item label="表单栅格">
             <el-slider v-model="activeData._config_.span" :min="1" :max="24" :marks="{ 12: '' }" />
+          </el-form-item>
+          <el-form-item label="默认值">
+            <el-input v-model="activeData._config_.defaultValue" placeholder="请输入默认值" />
           </el-form-item>
         </el-form>
         <!-- 表单属性 -->
@@ -61,9 +72,23 @@
   </div>
 </template>
 <script setup>
-import { defineProps, ref } from 'vue'
+import { defineProps, ref, reactive, defineEmits } from 'vue'
+import { inputComponents, selectComponents, } from '@/components/generator/config.js'
 const props = defineProps(['activeData', 'showField', 'formConf'])
+const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
+const tagList = reactive([{
+  title: '输入型组件',
+  list: inputComponents
+}, {
+  title: '选择性组件',
+  list: selectComponents
+}])
+const tagChange = (value) => {
+  let target = inputComponents.find(item => item._config_.tagIcon === value);
+  if (!target) selectComponents.find(item => item._config_.tagIcon === value);
+  emit('tag-change', target);
+}
 </script>
 <style scoped lang='scss'>
 .right-board {

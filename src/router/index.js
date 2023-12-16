@@ -1,12 +1,17 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import HomePage from '@/views/index/HomePage.vue'
-
+import MonacoPage from '@/views/index/MonacoPage.vue'
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomePage
   },
+  {
+    path: '/monaco',
+    name: 'monaco',
+    component: MonacoPage
+  }
   // {
   //   path: '/about',
   //   name: 'about',

@@ -44,11 +44,9 @@
             :disabled="formConf.disabled" :label-width="formConf.labelWidth + 'px'">
             <draggable class="drawing-board" :list="drawingList" group="componentsGroup" item-key="center-components"
               :animation="340">
-              <template #item="{ element }">
-                <draggable-item :currentItem="element" :activeId="activeId" @activeItem="activeFormItem" />
-              </template>
-              <template>
-                123
+              <template #item="{ element, index }">
+                <draggable-item :currentItem="element" :index="index" :activeId="activeId" :list="drawingList"
+                  @activeItem="activeFormItem" @copyItem="copyItem" @deleteItem="deleteItem" />
               </template>
             </draggable>
             <div class="empty-info" v-if="!drawingList.length">
@@ -59,19 +57,24 @@
       </el-scrollbar>
 
     </div>
-    <RightPanel :activeData="activeData" :showField="!!drawingList.length" :formConf="formConf"></RightPanel>
+    <RightPanel :activeData="activeData" :showField="!!drawingList.length" :formConf="formConf" @tag-change="tagChange">
+    </RightPanel>
+    <JsonDrawer size="60%" :jsonStr="JSON.stringify(formData)" v-model="dialogVisible" @refresh="refreshJson">
+    </JsonDrawer>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { getCurrentInstance, reactive, ref, onMounted, nextTick } from 'vue'
 import draggable from "vuedraggable";
 import RightPanel from './RightPanel.vue';
 import DraggableItem from './DraggableItem'
 import { inputComponents, layoutComponents, selectComponents, formConf as tempFormConf } from '@/components/generator/config.js'
 import { deepClone } from '@/utils/index'
 import { getIdGlobal } from '@/utils/db'
-// import { Delete, Edit, Search, Share, Upload } from '@element-plus/icons-vue';
+import { ElNotification } from 'element-plus'
+import JsonDrawer from './JsonDrawer.vue';
+
 const leftComponents = reactive([{
   title: '输入型组件',
   list: inputComponents
@@ -82,6 +85,7 @@ const leftComponents = reactive([{
   title: '布局型组件',
   list: layoutComponents
 }])
+const dialogVisible = ref(false);
 const formData = ref(null);
 const a = ref({ size: 'default' })
 const formConf = ref(tempFormConf);
@@ -115,21 +119,59 @@ const createIdAndKey = (item) => {
     config._vModel_ = `field${config.formId}`;
   } else if (config.layout === 'rowItem') {
     config.componentName = `row${config.formId}`;
+    !Array.isArray(config.children) && (config.children = []);
+    delete config.label
   }
-
+  if (config.children) {
+    config.children.forEach((item) => {
+      createIdAndKey(item);
+    })
+  }
   return item;
 }
 const activeFormItem = (item) => {
   activeData.value = item;
   activeId.value = item._config_.formId;
 }
-
+const copyItem = (item, list) => {
+  const clone = cloneComponent(item);
+  activeFormItem(clone);
+  list.push(clone);
+}
+const deleteItem = (index, list) => {
+  list.splice(index, 1)
+  if (list.length) {
+    activeFormItem(list.at(-1));
+  } else if (drawingList.length) {
+    activeFormItem(drawingList.at(-1));
+  }
+}
 const assembleFormData = () => {
   formData.value = Object.assign({ fields: deepClone(drawingList) }, formConf.value);
   console.log(formData.value);
 }
 const showJson = () => {
-  assembleFormData()
+  assembleFormData();
+  dialogVisible.value = true;
+}
+const refreshJson = (json) => {
+  try {
+    const { fields, ...obj } = JSON.parse(json);
+    drawingList.length = 0;
+    drawingList.push(...fields);
+    formConf.value = obj;
+  } catch {
+    ElNotification({
+      title: '错误',
+      message: 'JSON格式错误，请检查',
+      type: 'error'
+    })
+  }
+}
+
+const tagChange = (target) => {
+  activeData.value._config_.tag = target._config_.tag;
+  activeData.value._config_.type = target._config_.type;
 }
 
 </script>

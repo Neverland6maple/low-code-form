@@ -6,6 +6,7 @@ const AutoImport = require('unplugin-auto-import/webpack')
 const Components = require('unplugin-vue-components/webpack')
 const { ElementPlusResolver } = require('unplugin-vue-components/resolvers')
 const path = require('path')
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 const resolve = function (dir) {
   return path.join(__dirname, dir);
 }
@@ -36,6 +37,7 @@ module.exports = defineConfig({
       // Components({
       //   resolvers: [ElementPlusResolver()],
       // }),
+      new MonacoWebpackPlugin(),
     ]
     config.plugins.push(...plugins);
     config.externals = {
