@@ -22,6 +22,25 @@ const mapping = {
   'el-upload': ElUpload,
   'el-time-select': ElTimeSelect,
 }
+const componentChild = {};
+const slotsFiles = require.context('./slots', false, /\.js$/);
+slotsFiles.keys().forEach(fileName => {
+  const key = fileName.replace(/\.\/(.*)\.js/g, '$1');
+  componentChild[key] = slotsFiles(fileName).default
+})
+
+
+function mountSlotFiles(conf, children) {
+  const childObjs = componentChild[conf._config_.tag];
+  if (childObjs) {
+    Object.keys(childObjs).forEach(key => {
+      if (conf._slot_[key]) {
+        children[key] = childObjs[key](conf._slot_[key]);
+      }
+    })
+  }
+}
+
 function vModel(target, defaultValue) {
   target.modelValue = defaultValue;
 
@@ -30,18 +49,28 @@ function vModel(target, defaultValue) {
   // this.$emit('input', event)
   // };
 }
-function buildDataObject(conf) {
-  const clone = { type: conf.type };
-  if (conf._vModel_ !== undefined) {
-    vModel.call(this, clone, conf.defaultValue);
-  }
+function buildDataObject(item) {
+  const clone = { type: item._config_.type };
+  Object.keys(item).forEach(key => {
+    if (key === '_vModel_' && item._vModel_ !== undefined) {
+      vModel.call(this, clone, item._config_.defaultValue);
+    } else {
+      clone[key] = item[key];
+    }
+  });
+  clearAttrs(clone);
   return clone;
 }
 
-export default {
-  props: ['conf'],
-  render(context) {
+function clearAttrs(obj) {
+  delete obj._config_;
+}
 
-    return h(mapping[context.conf.tag], buildDataObject.call(context, context.conf), () => { })
+export default {
+  props: ['item'],
+  render(context) {
+    const children = {};
+    mountSlotFiles(context.item, children);
+    return h(mapping[context.item._config_.tag], buildDataObject.call(context, context.item), children)
   }
 }

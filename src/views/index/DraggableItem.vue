@@ -22,12 +22,12 @@ const components = {
 const layouts = {
   colItem(item, list, index) {
     const conf = item._config_;
-    const value = ref(conf.defaultValue);
     const { onActiveItem } = this.$attrs;
     const className = this.activeId === conf.formId ? 'drawing-item active-from-item' : 'drawing-item';
+    const labelWidth = conf.labelWidth ? conf.labelWidth + 'px' : '';
     return <el-col onClick={e => { onActiveItem(item); e.stopPropagation(); }} class={className} span={conf.span}>
-      <el-form-item for={"stopPropagation"} label={conf.label}>
-        <render conf={conf} onInput={e => conf.defaultValue = e}></render>
+      <el-form-item for={"stopPropagation"} label={conf.label} label-width={labelWidth}>
+        <render item={item} onInput={e => conf.defaultValue = e}></render>
       </el-form-item>
       {components.itemBtns.apply(this, arguments)}
     </el-col>

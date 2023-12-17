@@ -90,7 +90,7 @@ const formData = ref(null);
 const a = ref({ size: 'default' })
 const formConf = ref(tempFormConf);
 const tempActiveData = ref({});
-const activeData = ref({ _config_: { label: '' } });
+const activeData = ref({ _config_: {}, _slot_: {} });
 const activeId = ref(null);
 const idGlobal = ref(getIdGlobal());
 const arr = reactive([{ level: 1, context: 'fuck you' },
@@ -116,7 +116,7 @@ const createIdAndKey = (item) => {
   config.formId = idGlobal.value++;
   config.renderKey = `${config.formId}${+new Date()}`;
   if (config.layout === 'colItem') {
-    config._vModel_ = `field${config.formId}`;
+    item._vModel_ = `field${config.formId}`;
   } else if (config.layout === 'rowItem') {
     config.componentName = `row${config.formId}`;
     !Array.isArray(config.children) && (config.children = []);

@@ -7,7 +7,16 @@ export const inputComponents = [
       tag: "el-input",
       tagIcon: "input",
       defaultValue: undefined,
-    }
+      labelWidth: null,
+    },
+    _slot_: {
+      prepend: '',
+      append: '',
+    },
+    placeholder: '请输入单行文本',
+    maxlength: null,
+    'prefix-icon': '',
+
   },
   {
     _config_: {

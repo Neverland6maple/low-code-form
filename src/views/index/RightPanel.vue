@@ -19,10 +19,16 @@
             </el-select>
           </el-form-item>
           <el-form-item label="标题">
-            <el-input v-model="activeData._config_.label"></el-input>
+            <el-input v-model="activeData._config_.label" placeholder="请输入标题"></el-input>
           </el-form-item>
-          <el-form-item label="标题">
-            <el-input v-model="activeData._config_.label"></el-input>
+          <el-form-item label="字段名">
+            <el-input v-model="activeData._vModel_" placeholder="请输入标题"></el-input>
+          </el-form-item>
+          <el-form-item label="占位提示">
+            <el-input v-model="activeData.placeholder" placeholder="请输入占位提示"></el-input>
+          </el-form-item>
+          <el-form-item label="表单栅格">
+            <el-slider v-model="activeData._config_.span" :min="1" :max="24" :marks="{ 12: '' }" />
           </el-form-item>
           <el-form-item label="标签对齐" v-show="activeData._config_.layout === 'rowItem'">
             <el-radio-group v-model="activeData.type">
@@ -30,11 +36,27 @@
               <el-radio-button label="flex">flex</el-radio-button>
             </el-radio-group>
           </el-form-item>
-          <el-form-item label="表单栅格">
-            <el-slider v-model="activeData._config_.span" :min="1" :max="24" :marks="{ 12: '' }" />
+          <el-form-item label="标签宽度">
+            <el-input type="number" v-model="activeData._config_.labelWidth" placeholder="请输入标签宽度" />
           </el-form-item>
-          <el-form-item label="默认值">
-            <el-input v-model="activeData._config_.defaultValue" placeholder="请输入默认值" />
+          <el-form-item label="前缀">
+            <el-input v-model="activeData._slot_.prepend" placeholder="请输入前缀" />
+          </el-form-item>
+          <el-form-item label="后缀">
+            <el-input v-model="activeData._slot_.append" placeholder="请输入后缀" />
+          </el-form-item>
+          <el-form-item label="前图标">
+            <el-input v-model="activeData['prefix-icon']" placeholder="请选择前图标" disabled>
+              <template #append>
+                <el-button icon="Pointer" @click="openIconsDialog('prefix-icon')">
+                  选择</el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="最多输入">
+            <el-input v-model="activeData.maxLength" placeholder="请输入最多输入">
+              <template #append>个字符</template>
+            </el-input>
           </el-form-item>
         </el-form>
         <!-- 表单属性 -->
@@ -68,15 +90,23 @@
         </el-form>
       </el-scrollbar>
     </div>
-
+    <!-- <icons-dialog v-model="activeData[currentIconModel]"></icons-dialog> -->
+    <icons-dialog v-model="iconsVisible" :current="activeData[currentIconModel]"></icons-dialog>
   </div>
 </template>
 <script setup>
 import { defineProps, ref, reactive, defineEmits } from 'vue'
 import { inputComponents, selectComponents, } from '@/components/generator/config.js'
+import IconsDialog from './IconsDialog.vue';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
+const iconsVisible = ref(false);
+const currentIconModel = ref(null)
+const openIconsDialog = (way) => {
+  iconsVisible.value = true;
+  currentIconModel.value = way;
+}
 const tagList = reactive([{
   title: '输入型组件',
   list: inputComponents
