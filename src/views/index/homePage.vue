@@ -39,6 +39,7 @@
         </el-button>
       </div>
       <el-scrollbar class="center-scrollbar">
+        {{ validateForm }}
         <el-row class="center-board-row" :gutter="formConf.gutter">
           <el-form class="center-board-form" :size="formConf.size" :label-positon="formConf.labelPosition"
             :disabled="formConf.disabled" :label-width="formConf.labelWidth + 'px'">
@@ -87,7 +88,7 @@ const leftComponents = reactive([{
 }])
 const dialogVisible = ref(false);
 const formData = ref(null);
-const a = ref({ size: 'default' })
+const validateForm = reactive({});
 const formConf = ref(tempFormConf);
 const tempActiveData = ref({});
 const activeData = ref({ _config_: {}, _slot_: {} });
@@ -101,6 +102,9 @@ const onEnd = (obj) => {
   if (obj.from !== obj.to) {
     activeData.value = tempActiveData.value;
     activeId.value = tempActiveData.value._config_.formId;
+    if (tempActiveData.value._config_.layout !== 'rowItem') {
+      validateForm[tempActiveData.value._config_.formId] = tempActiveData.value._config_.defaultValue;
+    }
   }
 }
 const cloneComponent = (item) => {

@@ -1,4 +1,4 @@
-import { h } from 'vue';
+import { h, ref } from 'vue';
 import {
   ElInput, ElButton, ElCascader, ElCheckbox, ElColorPicker,
   ElDatePicker, ElInputNumber, ElRadio, ElRate, ElSelect, ElSlider,
@@ -34,7 +34,7 @@ function mountSlotFiles(conf, children) {
   const childObjs = componentChild[conf._config_.tag];
   if (childObjs) {
     Object.keys(childObjs).forEach(key => {
-      if (conf._slot_[key]) {
+      if (conf._slot_ && conf._slot_[key]) {
         children[key] = childObjs[key](conf._slot_[key]);
       }
     })
@@ -43,14 +43,12 @@ function mountSlotFiles(conf, children) {
 
 function vModel(target, defaultValue) {
   target.modelValue = defaultValue;
-
-  // target['onUpdate:modelValue'] = (event) => {
-  // this.$emit('onUpdate:modelValue', event)
-  // this.$emit('input', event)
-  // };
+  target['onUpdate:modelValue'] = (event) => {
+    this.$emit('update:modelValue', event)
+  };
 }
 function buildDataObject(item) {
-  const clone = { type: item._config_.type };
+  const clone = {};
   Object.keys(item).forEach(key => {
     if (key === '_vModel_' && item._vModel_ !== undefined) {
       vModel.call(this, clone, item._config_.defaultValue);
@@ -58,6 +56,7 @@ function buildDataObject(item) {
       clone[key] = item[key];
     }
   });
+  console.log(clone);
   clearAttrs(clone);
   return clone;
 }
@@ -67,6 +66,7 @@ function clearAttrs(obj) {
 }
 
 export default {
+  inheritAttrs: false,
   props: ['item'],
   render(context) {
     const children = {};

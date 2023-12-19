@@ -18,11 +18,11 @@
               </el-option-group>
             </el-select>
           </el-form-item>
-          <el-form-item label="标题">
-            <el-input v-model="activeData._config_.label" placeholder="请输入标题"></el-input>
-          </el-form-item>
           <el-form-item label="字段名">
             <el-input v-model="activeData._vModel_" placeholder="请输入标题"></el-input>
+          </el-form-item>
+          <el-form-item label="标题">
+            <el-input v-model="activeData._config_.label" placeholder="请输入标题"></el-input>
           </el-form-item>
           <el-form-item label="占位提示">
             <el-input v-model="activeData.placeholder" placeholder="请输入占位提示"></el-input>
@@ -39,24 +39,127 @@
           <el-form-item label="标签宽度">
             <el-input type="number" v-model="activeData._config_.labelWidth" placeholder="请输入标签宽度" />
           </el-form-item>
-          <el-form-item label="前缀">
+          <el-form-item label="组件宽度" v-if="activeData.style && activeData.style.width !== undefined">
+            <el-input v-model="activeData.style.width" placeholder="请输入组件宽度" />
+          </el-form-item>
+          <el-form-item label="默认值">
+            <el-input v-model="activeData._config_.defaultValue" placeholder="请输入默认值" />
+          </el-form-item>
+          <el-form-item label="最小值" v-if="isShowMin">
+            <el-input-number v-model="activeData.min" :min="0" placeholder="最小值" />
+          </el-form-item>
+          <el-form-item label="最大值" v-if="isShowMax">
+            <el-input-number v-model="activeData.max" :min="0" placeholder="最大值" />
+          </el-form-item>
+          <el-form-item label="步长" v-if="isShowStep">
+            <el-input-number v-model="activeData.step" placeholder="步长" />
+          </el-form-item>
+          <el-form-item label="精度" v-if="activeData._config_.tag === 'el-input-number'">
+            <el-input-number v-model="activeData.precision" :min="0" placeholder="精度" />
+          </el-form-item>
+          <el-form-item label="前缀" v-if="activeData._slot_ && activeData._slot_.prepend !== undefined">
             <el-input v-model="activeData._slot_.prepend" placeholder="请输入前缀" />
           </el-form-item>
-          <el-form-item label="后缀">
+          <el-form-item label="后缀" v-if="activeData._slot_ && activeData._slot_.append !== undefined">
             <el-input v-model="activeData._slot_.append" placeholder="请输入后缀" />
           </el-form-item>
-          <el-form-item label="前图标">
-            <el-input v-model="activeData['prefix-icon']" placeholder="请选择前图标" disabled>
+          <el-form-item label="前图标" v-if="activeData['prefix-icon'] !== undefined">
+            <el-input v-model="activeData['prefix-icon']" placeholder="请选择前图标" readonly>
               <template #append>
                 <el-button icon="Pointer" @click="openIconsDialog('prefix-icon')">
                   选择</el-button>
               </template>
             </el-input>
           </el-form-item>
-          <el-form-item label="最多输入">
-            <el-input v-model="activeData.maxLength" placeholder="请输入最多输入">
+          <el-form-item label="后图标" v-if="activeData['suffix-icon'] !== undefined">
+            <el-input v-model="activeData['suffix-icon']" placeholder="请选择后图标" readonly>
+              <template #append>
+                <el-button icon="Pointer" @click="openIconsDialog('suffix-icon')">
+                  选择</el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="最多输入" v-if="activeData.maxlength !== undefined">
+            <el-input v-model="activeData.maxlength" placeholder="请输入最多输入">
               <template #append>个字符</template>
             </el-input>
+          </el-form-item>
+
+          <template v-if="isShowOptions">
+            <el-divider>选项</el-divider>
+            <draggable class="drawing-board" :list="activeData._slot_.default" item-key="right-components"
+              :animation="340" handle=".options-drag">
+              <template #item="{ element, index }">
+                <div class="options-item">
+                  <el-icon class="options-drag">
+                    <Operation />
+                  </el-icon>
+                  <el-input v-model="element.label"></el-input>
+                  <el-input v-model="element.value"></el-input>
+                  <el-icon color="#f56c6c" style="cursor: pointer;" @click="activeData._slot_.default.splice(index, 1)">
+                    <Remove />
+                  </el-icon>
+                </div>
+              </template>
+            </draggable>
+            <el-button text icon="CirclePlus" @click="activeData._slot_.default.push({ label: '', value: '' })"
+              class="add-options">
+              添加选项
+            </el-button>
+            <el-divider />
+          </template>
+
+          <template v-if="activeData._config_.tag === 'el-cascader'">
+            <el-divider>选项</el-divider>
+            <el-tree :data="activeData.options" :expand-on-click-node="false" draggable :render-content="renderContent" />
+            <el-button text icon="CirclePlus" @click="addTreeItem" class="add-options">
+              添加父级
+            </el-button>
+            <el-divider />
+          </template>
+
+          <el-form-item label="按钮位置" v-if="activeData['controls-position'] !== undefined">
+            <el-radio-group v-model="activeData['controls-position']" size="large">
+              <el-radio-button label="">默认</el-radio-button>
+              <el-radio-button label="right">右侧</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="显示标签" v-if="activeData._config_.showLabel !== undefined
+            && activeData._config_.labelWidth !== undefined">
+            <el-switch v-model="activeData._config_.showLabel" />
+          </el-form-item>
+          <el-form-item label="任选层级" v-if="activeData._config_.tag === 'el-cascader'">
+            <el-switch v-model="activeData.props.checkStrictly" />
+          </el-form-item>
+          <el-form-item label="是否多选" v-if="activeData._config_.tag === 'el-cascader'">
+            <el-switch v-model="activeData.props.multiple" />
+          </el-form-item>
+          <el-form-item label="展示全路径" v-if="activeData._config_.tag === 'el-cascader'">
+            <el-switch v-model="activeData['show-all-levels']" />
+          </el-form-item>
+          <el-form-item label="严格步数" v-if="activeData['step-strictly'] !== undefined">
+            <el-switch v-model="activeData['step-strictly']" />
+          </el-form-item>
+          <el-form-item label="输入统计" v-if="activeData['show-word-limit'] !== undefined">
+            <el-switch v-model="activeData['show-word-limit']" />
+          </el-form-item>
+          <el-form-item label="能否清空" v-if="activeData.clearable !== undefined">
+            <el-switch v-model="activeData.clearable" />
+          </el-form-item>
+          <el-form-item label="是否只读" v-if="activeData.readonly !== undefined">
+            <el-switch v-model="activeData.readonly" />
+          </el-form-item>
+          <el-form-item label="是否禁用" v-if="activeData.disabled !== undefined">
+            <el-switch v-model="activeData.disabled" />
+          </el-form-item>
+          <el-form-item label="能否搜索" v-if="activeData.filterable !== undefined">
+            <el-switch v-model="activeData.filterable" />
+          </el-form-item>
+          <el-form-item label="是否多选" v-if="activeData._config_.tag === 'el-select'">
+            <el-switch v-model="activeData.multiple" @change="multipleChange" />
+          </el-form-item>
+          <el-form-item label="是否必填" v-if="activeData._config_.required !== undefined">
+            <el-switch v-model="activeData._config_.required" />
           </el-form-item>
         </el-form>
         <!-- 表单属性 -->
@@ -91,18 +194,24 @@
       </el-scrollbar>
     </div>
     <!-- <icons-dialog v-model="activeData[currentIconModel]"></icons-dialog> -->
-    <icons-dialog v-model="iconsVisible" :current="activeData[currentIconModel]"></icons-dialog>
+    <icons-dialog v-model="iconsVisible" :current="activeData[currentIconModel]" width="60%"
+      @select="setIcon"></icons-dialog>
+    <TreeNodeDialog v-model="dialogVisible" @commit="addNode"></TreeNodeDialog>
   </div>
 </template>
-<script setup>
-import { defineProps, ref, reactive, defineEmits } from 'vue'
+<script setup lang="jsx">
+import { defineProps, ref, reactive, defineEmits, computed } from 'vue'
 import { inputComponents, selectComponents, } from '@/components/generator/config.js'
 import IconsDialog from './IconsDialog.vue';
+import draggable from "vuedraggable";
+import TreeNodeDialog from './TreeNodeDialog.vue';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
 const iconsVisible = ref(false);
-const currentIconModel = ref(null)
+const currentIconModel = ref(null);
+const dialogVisible = ref(false);
+const currentNode = ref(null);
 const openIconsDialog = (way) => {
   iconsVisible.value = true;
   currentIconModel.value = way;
@@ -119,6 +228,54 @@ const tagChange = (value) => {
   if (!target) selectComponents.find(item => item._config_.tagIcon === value);
   emit('tag-change', target);
 }
+const setIcon = (icon) => {
+  props.activeData[currentIconModel.value] = icon;
+}
+
+const isShowMin = computed(() => {
+  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+})
+const isShowMax = computed(() => {
+  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+})
+const isShowStep = computed(() => {
+  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+})
+const isShowOptions = computed(() => {
+  return ['el-select'].indexOf(props.activeData._config_.tag) > -1
+})
+const multipleChange = (state) => {
+  props.activeData._config_.defaultValue = state ? [] : '';
+}
+const addTreeItem = () => {
+  dialogVisible.value = true;
+  currentNode.value = props.activeData.options;
+}
+const append = (data) => {
+  dialogVisible.value = true;
+  currentNode.value = data;
+  if (!currentNode.value.children) currentNode.value.children = [];
+}
+const addNode = (data) => {
+  const children = currentNode.value.children || currentNode.value;
+  children.push(data);
+}
+const remove = (node, data) => {
+  const parent = node.parent;
+  const children = parent.data.children || parent.data;
+  const index = children.indexOf(data);
+  children.splice(index, 1)
+}
+const renderContent = (h, { node, data, store }) => {
+  return <div class={'custom-tree-node'}>
+    <div>{node.label}</div>
+    <div>
+      <el-icon onClick={e => append(data)} title="添加" style="margin-right:4px"><Plus /></el-icon>
+      <el-icon onClick={e => remove(node, data)} title="删除"><Delete /></el-icon>
+    </div>
+  </div>
+}
+
 </script>
 <style scoped lang='scss'>
 .right-board {
@@ -128,6 +285,28 @@ const tagChange = (value) => {
   height: 100vh;
   width: 350px;
   box-sizing: border-box;
+}
+
+:deep(.custom-tree-node) {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.add-options {
+  color: #409EFF;
+}
+
+.options-item {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  margin-bottom: 4px;
+
+  .el-input {
+    margin: 0 3px;
+  }
 }
 
 .right-scrollbar {

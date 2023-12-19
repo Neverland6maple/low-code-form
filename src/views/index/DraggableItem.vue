@@ -24,10 +24,12 @@ const layouts = {
     const conf = item._config_;
     const { onActiveItem } = this.$attrs;
     const className = this.activeId === conf.formId ? 'drawing-item active-from-item' : 'drawing-item';
-    const labelWidth = conf.labelWidth ? conf.labelWidth + 'px' : '';
+    const labelWidth = conf.showLabel ? conf.labelWidth ? conf.labelWidth + 'px' : '' : '0px';
+    const label = conf.showLabel ? conf.label : '';
     return <el-col onClick={e => { onActiveItem(item); e.stopPropagation(); }} class={className} span={conf.span}>
-      <el-form-item for={"stopPropagation"} label={conf.label} label-width={labelWidth}>
-        <render item={item} onInput={e => conf.defaultValue = e}></render>
+      <el-form-item for={"stopPropagation"} label={label} label-width={labelWidth}
+        required={conf.required}>
+        <render item={item} v-model={conf.defaultValue}></render>
       </el-form-item>
       {components.itemBtns.apply(this, arguments)}
     </el-col>
@@ -37,7 +39,6 @@ const layouts = {
     const className = this.activeId === conf.formId ? 'drawing-row-item active-from-item' : 'drawing-row-item';
     const { onActiveItem, onCopyItem, onDeleteItem } = this.$attrs;
     conf.children = conf.children || [];
-    const arr = reactive([]);
     return <el-col span={conf.span}>
       <el-row class={className} onClick={e => { onActiveItem(item); e.stopPropagation(); }} >
         {/* <el-col span={6}>{JSON.stringify(conf.children)}</el-col> */}

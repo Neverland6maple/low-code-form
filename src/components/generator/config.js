@@ -6,8 +6,11 @@ export const inputComponents = [
       label: '单行文本',
       tag: "el-input",
       tagIcon: "input",
-      defaultValue: undefined,
+      defaultValue: '',
       labelWidth: null,
+      showLabel: true,
+      required: true,
+      regList: [{ required: true, message: 'age is required' }]
     },
     _slot_: {
       prepend: '',
@@ -16,7 +19,12 @@ export const inputComponents = [
     placeholder: '请输入单行文本',
     maxlength: null,
     'prefix-icon': '',
-
+    'suffix-icon': '',
+    'show-word-limit': false,
+    readonly: false,
+    clearable: true,
+    disabled: false,
+    style: { width: '100%' },
   },
   {
     _config_: {
@@ -24,8 +32,18 @@ export const inputComponents = [
       label: '多行文本',
       tag: "el-input",
       tagIcon: "textarea",
-      type: "textarea"
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    type: "textarea",
+    placeholder: '请输入多行文本',
+    maxlength: null,
+    'show-word-limit': false,
+    readonly: false,
+    disabled: false,
+    style: { width: '100%' },
   },
   {
     _config_: {
@@ -33,9 +51,26 @@ export const inputComponents = [
       label: '密码',
       tag: "el-input",
       tagIcon: "password",
-      type: "password"
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    _slot_: {
+      prepend: '',
+      append: '',
+    },
+    type: "password",
     'show-password': true,
+    placeholder: '请输入密码',
+    style: { width: '100%' },
+    'prefix-icon': '',
+    'suffix-icon': '',
+    maxlength: null,
+    'show-word-limit': false,
+    readonly: false,
+    clearable: true,
+    disabled: false,
   },
   {
     _config_: {
@@ -43,7 +78,19 @@ export const inputComponents = [
       label: '计数器',
       tag: "el-input-number",
       tagIcon: "number",
+      defaultValue: 0,
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    placeholder: '计数器',
+    disabled: false,
+    min: undefined,
+    max: undefined,
+    step: 1,
+    precision: undefined,
+    'controls-position': '',
+    'step-strictly': false,
   },
   {
     _config_: {
@@ -64,7 +111,33 @@ export const selectComponents = [
       label: '下拉选择',
       tag: "el-select",
       tagIcon: "select",
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    _slot_: {
+      default: [
+        {
+          value: '1',
+          label: '选项一',
+        },
+        {
+          value: '2',
+          label: '选项二',
+        }, {
+          label: '选项三',
+          value: '3',
+        }
+
+      ]
+    },
+    placeholder: '请选择下拉选择',
+    clearable: true,
+    disabled: false,
+    filterable: false,
+    multiple: false,
+    style: { width: '100%' },
   },
   {
     _config_: {
@@ -72,7 +145,64 @@ export const selectComponents = [
       label: '级联选择',
       tag: "el-cascader",
       tagIcon: "cascader",
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    options: [
+      {
+        value: 'guide',
+        label: 'Guide',
+        children: [
+          {
+            value: 'disciplines',
+            label: 'Disciplines',
+            children: [
+              {
+                value: 'consistency',
+                label: 'Consistency',
+              },
+              {
+                value: 'feedback',
+                label: 'Feedback',
+              },
+              {
+                value: 'efficiency',
+                label: 'Efficiency',
+              },
+              {
+                value: 'controllability',
+                label: 'Controllability',
+              },
+            ],
+          },
+          {
+            value: 'navigation',
+            label: 'Navigation',
+            children: [
+              {
+                value: 'side nav',
+                label: 'Side Navigation',
+              },
+              {
+                value: 'top nav',
+                label: 'Top Navigation',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    placeholder: '请选择级联选择',
+    'show-all-levels': true,
+    filterable: false,
+    clearable: true,
+    disabled: false,
+    props: {
+      checkStrictly: false,
+      multiple: false,
+    }
   },
   {
     _config_: {

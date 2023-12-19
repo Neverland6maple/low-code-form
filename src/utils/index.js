@@ -71,3 +71,7 @@ export const beautifierConf = {
     indent_empty_lines: true
   }
 }
+
+export const isNumberStr = (str) => {
+  return !isNaN(str);
+}
