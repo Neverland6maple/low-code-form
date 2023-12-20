@@ -43,7 +43,43 @@
             <el-input v-model="activeData.style.width" placeholder="请输入组件宽度" />
           </el-form-item>
           <el-form-item label="默认值">
-            <el-input v-model="activeData._config_.defaultValue" placeholder="请输入默认值" />
+            <el-input :modelValue="setDefaultValue(activeData._config_.defaultValue)"
+              @update:modelValue="onDefaultValueInput" placeholder="请输入默认值" />
+          </el-form-item>
+          <el-form-item label="时间段" v-if="activeData._config_.tag === 'el-time-picker'">
+            <el-time-picker
+              :modelValue="setDefaultTime(activeData['disabled-hours'], activeData['disabled-minutes'], activeData['disabled-seconds'])"
+              @update:modelValue="onDefaultTime" is-range range-separator="至" start-placeholder="Start time"
+              end-placeholder="End time" />
+          </el-form-item>
+          <el-form-item label="时间格式" v-if="activeData._config_.tag === 'el-time-picker'">
+            <el-input v-model="activeData.format" placeholder="请输入时间格式" />
+          </el-form-item>
+          <el-form-item label="开启提示" v-if="activeData._config_.tag === 'el-switch'">
+            <el-input v-model="activeData['active-text']" placeholder="请输入开启提示" />
+          </el-form-item>
+          <el-form-item label="关闭提示" v-if="activeData._config_.tag === 'el-switch'">
+            <el-input v-model="activeData['inactive-text']" placeholder="请输入关闭提示" />
+          </el-form-item>
+          <el-form-item label="开启值" v-if="activeData._config_.tag === 'el-switch'">
+            <el-input :modelValue="setDefaultValue(activeData['active-value'])"
+              @update:modelValue="onSwitchValueInput($event, 'active-value')" placeholder="请输入开启值" />
+          </el-form-item>
+          <el-form-item label="关闭值" v-if="activeData._config_.tag === 'el-switch'">
+            <el-input :modelValue="setDefaultValue(activeData['inactive-value'])"
+              @update:modelValue="onSwitchValueInput($event, 'inactive-value')" placeholder="请输入关闭值" />
+          </el-form-item>
+          <el-form-item label="开启颜色" v-if="activeData._config_.tag === 'el-switch'">
+            <el-color-picker v-model="activeData.style['--el-switch-on-color']" />
+          </el-form-item>
+          <el-form-item label="关闭颜色" v-if="activeData._config_.tag === 'el-switch'">
+            <el-color-picker v-model="activeData.style['--el-switch-off-color']" />
+          </el-form-item>
+          <el-form-item label="至少应选" v-if="activeData._config_.tag === 'el-checkbox-group'">
+            <el-input-number v-model="activeData.min" :min="0" placeholder="至少应选" />
+          </el-form-item>
+          <el-form-item label="最多可选" v-if="activeData._config_.tag === 'el-checkbox-group'">
+            <el-input-number v-model="activeData.min" :min="0" placeholder="最多可选" />
           </el-form-item>
           <el-form-item label="最小值" v-if="isShowMin">
             <el-input-number v-model="activeData.min" :min="0" placeholder="最小值" />
@@ -124,10 +160,25 @@
               <el-radio-button label="right">右侧</el-radio-button>
             </el-radio-group>
           </el-form-item>
+          <el-form-item label="选项样式" v-if="activeData._config_.optionType !== undefined">
+            <el-radio-group v-model="activeData._config_.optionType" size="large">
+              <el-radio-button label="">默认</el-radio-button>
+              <el-radio-button label="button">按钮</el-radio-button>
+            </el-radio-group>
+          </el-form-item>
           <el-form-item label="显示标签" v-if="activeData._config_.showLabel !== undefined
             && activeData._config_.labelWidth !== undefined">
             <el-switch v-model="activeData._config_.showLabel" />
           </el-form-item>
+          <el-form-item label="显示间断点" v-if="activeData['show-stops'] !== undefined">
+            <el-switch v-model="activeData['show-stops']" />
+          </el-form-item>
+          <el-form-item label="范围选择" v-if="activeData.range !== undefined">
+            <el-switch v-model="activeData.range" />
+          </el-form-item>
+          <!-- <el-form-item label="是否带边框" v-if="activeData.border !== undefined">
+            <el-switch v-model="activeData.border" />
+          </el-form-item> -->
           <el-form-item label="任选层级" v-if="activeData._config_.tag === 'el-cascader'">
             <el-switch v-model="activeData.props.checkStrictly" />
           </el-form-item>
@@ -148,6 +199,17 @@
           </el-form-item>
           <el-form-item label="是否只读" v-if="activeData.readonly !== undefined">
             <el-switch v-model="activeData.readonly" />
+          </el-form-item>
+          <el-form-item label="是否带边框"
+            v-if="activeData.border !== undefined && activeData._config_.optionType !== 'el-radio-button'">
+            <el-switch v-model="activeData.border" />
+          </el-form-item>
+          <el-form-item label="组件尺寸" v-if="activeData.size">
+            <el-radio-group v-model="activeData.size" size="large">
+              <el-radio-button label="large">中等</el-radio-button>
+              <el-radio-button label="default">较小</el-radio-button>
+              <el-radio-button label="small">迷你</el-radio-button>
+            </el-radio-group>
           </el-form-item>
           <el-form-item label="是否禁用" v-if="activeData.disabled !== undefined">
             <el-switch v-model="activeData.disabled" />
@@ -205,6 +267,7 @@ import { inputComponents, selectComponents, } from '@/components/generator/confi
 import IconsDialog from './IconsDialog.vue';
 import draggable from "vuedraggable";
 import TreeNodeDialog from './TreeNodeDialog.vue';
+import { isNumberStr } from '@/utils';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
@@ -233,16 +296,16 @@ const setIcon = (icon) => {
 }
 
 const isShowMin = computed(() => {
-  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+  return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
 })
 const isShowMax = computed(() => {
-  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+  return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
 })
 const isShowStep = computed(() => {
-  return ['el-input-number'].indexOf(props.activeData._config_.tag) > -1
+  return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
 })
 const isShowOptions = computed(() => {
-  return ['el-select'].indexOf(props.activeData._config_.tag) > -1
+  return ['el-select', 'el-radio-group', 'el-checkbox-group'].indexOf(props.activeData._config_.tag) > -1
 })
 const multipleChange = (state) => {
   props.activeData._config_.defaultValue = state ? [] : '';
@@ -275,7 +338,38 @@ const renderContent = (h, { node, data, store }) => {
     </div>
   </div>
 }
-
+const setDefaultValue = (val) => {
+  if (typeof val === 'boolean') {
+    return val + '';
+  } else if (Array.isArray(val)) {
+    return val.join(',');
+  }
+  return val;
+}
+const onSwitchValueInput = (val, type) => {
+  if (['false', 'true'].includes(val)) {
+    props.activeData[type] = JSON.parse(val);
+  } else {
+    props.activeData[type] = isNumberStr(val) ? +val : val;
+  }
+}
+const onDefaultValueInput = (val) => {
+  if (['false', 'true'].includes(val)) {
+    props.activeData._config_.defaultValue = JSON.parse(val);
+  } else if (Array.isArray(props.activeData._config_.defaultValue)) {
+    props.activeData._config_.defaultValue = val.split(',')
+  } else {
+    props.activeData._config_.defaultValue = isNumberStr(val) ? +val : val;
+  }
+}
+const setDefaultTime = (h, m, s) => {
+  return [new Date(`2023 ${h[0]}:${m[0]}:${s[0]}`), new Date(`2023 ${h[1]}:${m[1]}:${s[1]}`)]
+}
+const onDefaultTime = (arr) => {
+  props.activeData['disabled-hours'] = [arr[0].getHours(), arr[1].getHours()]
+  props.activeData['disabled-minutes'] = [arr[0].getMinutes(), arr[1].getMinutes()]
+  props.activeData['disabled-seconds'] = [arr[0].getSeconds(), arr[1].getSeconds()]
+}
 </script>
 <style scoped lang='scss'>
 .right-board {

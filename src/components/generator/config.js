@@ -202,7 +202,8 @@ export const selectComponents = [
     props: {
       checkStrictly: false,
       multiple: false,
-    }
+    },
+    style: { width: '100%' },
   },
   {
     _config_: {
@@ -210,15 +211,63 @@ export const selectComponents = [
       label: '单选框组',
       tag: "el-radio-group",
       tagIcon: "radio",
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
+      optionType: '',
     },
+    _slot_: {
+      default: [
+        {
+          value: '1',
+          label: '选项一',
+        },
+        {
+          value: '2',
+          label: '选项二',
+        }, {
+          label: '选项三',
+          value: '3',
+        }
+      ]
+    },
+    border: false,
+    size: 'large',
+    disabled: false,
   },
   {
     _config_: {
       layout: 'colItem',
       label: '多选框组',
-      tag: "el-checkbox",
+      tag: "el-checkbox-group",
       tagIcon: "checkbox",
+      defaultValue: [],
+      labelWidth: null,
+      showLabel: true,
+      required: true,
+      optionType: '',
     },
+    _slot_: {
+      default: [
+        {
+          value: '1',
+          label: '选项一',
+        },
+        {
+          value: '2',
+          label: '选项二',
+        }, {
+          label: '选项三',
+          value: '3',
+        }
+      ]
+    },
+    border: false,
+    disabled: false,
+    size: 'large',
+    min: undefined,
+    max: undefined,
   },
   {
     _config_: {
@@ -226,7 +275,20 @@ export const selectComponents = [
       label: '开关',
       tag: "el-switch",
       tagIcon: "switch",
+      defaultValue: false,
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    'active-text': '',
+    'inactive-text': '',
+    'active-value': true,
+    'inactive-value': false,
+    style: {
+      '--el-switch-on-color': undefined,
+      '--el-switch-off-color': undefined,
+    },
+    disabled: false,
   },
   {
     _config_: {
@@ -234,15 +296,35 @@ export const selectComponents = [
       label: '滑块',
       tag: "el-slider",
       tagIcon: "slider",
+      defaultValue: 0,
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    min: 0,
+    max: 100,
+    step: 1,
+    'show-stops': false,
+    range: false,
+    disabled: false,
   },
   {
     _config_: {
       layout: 'colItem',
       label: '时间选择',
-      tag: "el-time-select",
+      tag: "el-time-picker",
       tagIcon: "time",
+      defaultValue: '',
+      labelWidth: null,
+      showLabel: true,
+      required: true,
     },
+    'disabled-hours': [0, 23],
+    'disabled-minutes': [0, 59],
+    'disabled-seconds': [0, 59],
+    format: 'HH:mm:ss',
+    clearable: false,
+    disabled: false,
   },
   {
     _config_: {
