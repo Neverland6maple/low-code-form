@@ -73,5 +73,6 @@ export const beautifierConf = {
 }
 
 export const isNumberStr = (str) => {
+  if (str === '') return false;
   return !isNaN(str);
 }

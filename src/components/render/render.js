@@ -2,7 +2,7 @@ import { h, ref } from 'vue';
 import {
   ElInput, ElButton, ElCascader, ElCheckboxGroup, ElColorPicker,
   ElDatePicker, ElInputNumber, ElRadioGroup, ElRate, ElSelect, ElSlider,
-  ElSwitch, ElTimePicker, ElUpload, ElTimeSelect
+  ElSwitch, ElTimePicker, ElUpload, ElTimeSelect, ElMessage
 } from 'element-plus';
 import { deepClone } from '@/utils';
 const mapping = {
@@ -55,6 +55,31 @@ function vModel(target, defaultValue) {
 }
 function buildDataObject(item) {
   const clone = {};
+  if (item._config_.tag === 'el-upload' && item._config_.fileSize !== undefined) {
+    clone['before-upload'] = (rawFile) => {
+      let size = rawFile.size;
+      let turn;
+      switch (item._config_.sizeUnit) {
+        case 'KB':
+          turn = 1;
+          break;
+        case 'MB':
+          turn = 2;
+          break;
+        case 'GB':
+          turn = 3;
+          break;
+      }
+      while (turn-- > 0) {
+        size /= 1024;
+      }
+      if (size < item._config_.fileSize) {
+        return true
+      }
+      ElMessage.error(`上传文件大小需小于${item._config_.fileSize}${item._config_.sizeUnit}`)
+      return false;
+    }
+  }
   Object.keys(item).forEach(key => {
     if (key === '_vModel_' && item._vModel_ !== undefined) {
       vModel.call(this, clone, item._config_.defaultValue);

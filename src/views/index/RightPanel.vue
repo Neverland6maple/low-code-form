@@ -10,6 +10,9 @@
         <!-- 组件属性 -->
         <el-form v-show="activeName === 'field' && showField" label-width="90px">
           {{ activeData }}
+          <el-upload action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" :beforeUpload="test">
+            <el-button type="primary">上传</el-button>
+          </el-upload>
           <el-form-item label="组件类型">
             <el-select v-model="activeData._config_.tagIcon" @change="tagChange">
               <el-option-group v-for="group in tagList" :key="group.title" :label="group.title">
@@ -24,8 +27,14 @@
           <el-form-item label="标题">
             <el-input v-model="activeData._config_.label" placeholder="请输入标题"></el-input>
           </el-form-item>
-          <el-form-item label="占位提示">
+          <el-form-item label="占位提示" v-if="activeData.placeholder !== undefined">
             <el-input v-model="activeData.placeholder" placeholder="请输入占位提示"></el-input>
+          </el-form-item>
+          <el-form-item label="开始占位" v-if="activeData['start-placeholder'] !== undefined">
+            <el-input v-model="activeData['start-placeholder']" placeholder="请输入开始占位"></el-input>
+          </el-form-item>
+          <el-form-item label="结束占位" v-if="activeData['end-placeholder'] !== undefined">
+            <el-input v-model="activeData['end-placeholder']" placeholder="请输入结束占位"></el-input>
           </el-form-item>
           <el-form-item label="表单栅格">
             <el-slider v-model="activeData._config_.span" :min="1" :max="24" :marks="{ 12: '' }" />
@@ -46,14 +55,72 @@
             <el-input :modelValue="setDefaultValue(activeData._config_.defaultValue)"
               @update:modelValue="onDefaultValueInput" placeholder="请输入默认值" />
           </el-form-item>
-          <el-form-item label="时间段" v-if="activeData._config_.tag === 'el-time-picker'">
+          <el-form-item label="文件字段名" v-if="activeData._config_.tag === 'el-upload'">
+            <el-input v-model="activeData.name" placeholder="请输入文件字段名" />
+          </el-form-item>
+          <el-form-item label="文件类型" v-if="activeData._config_.tag === 'el-upload'">
+            <el-select v-model="activeData.accept">
+              <el-option label="图片" value="image/*" />
+              <el-option label="视频" value="vodep/*" />
+              <el-option label="音频" value="audio/*" />
+              <el-option label="excel" value=".xls,.xlsx" />
+              <el-option label="word" value=".doc,.docx" />
+              <el-option label="pdf" value=".pdf" />
+              <el-option label="txt" value=".txt" />
+              <el-option label="任意" value="" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="文件大小" v-if="activeData._config_.tag === 'el-upload'">
+            <el-input type="number" min="0" v-model="activeData._config_.fileSize" placeholder="请输入文件大小">
+              <template #append>
+                <el-select v-model="activeData._config_.sizeUnit" style="width:66px">
+                  <el-option label="KB" value="KB" />
+                  <el-option label="MB" value="MB" />
+                  <el-option label="GB" value="GB" />
+                </el-select>
+              </template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="上传地址" v-if="activeData._config_.tag === 'el-upload'">
+            <el-input v-model="activeData.action" placeholder="请输入上传地址" />
+          </el-form-item>
+          <el-form-item label="时间段"
+            v-if="activeData._config_.tag === 'el-time-picker' && activeData['is-range' === undefined]">
             <el-time-picker
               :modelValue="setDefaultTime(activeData['disabled-hours'], activeData['disabled-minutes'], activeData['disabled-seconds'])"
               @update:modelValue="onDefaultTime" is-range range-separator="至" start-placeholder="Start time"
               end-placeholder="End time" />
           </el-form-item>
-          <el-form-item label="时间格式" v-if="activeData._config_.tag === 'el-time-picker'">
-            <el-input v-model="activeData.format" placeholder="请输入时间格式" />
+          <el-form-item label="时间类型" v-if="activeData._config_.tag === 'el-date-picker'">
+            <el-select v-model="activeData.type" size="large" @change="changeFormat">
+              <template v-if="activeData._config_.tagIcon === 'date'">
+                <el-option label="日(date)" value="date" />
+                <el-option label="周(week)" value="week" />
+                <el-option label="月(month)" value="month" />
+                <el-option label="年(year)" value="year" />
+                <el-option label="日期时间(datetime)" value="datetime" />
+              </template>
+              <template v-else>
+                <el-option label="日期范围(daterange)" value="daterange" />
+                <el-option label="月范围(monthrange)" value="monthrange" />
+                <el-option label="日期时间范围(datetimerange)" value="datetimerange" />
+              </template>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="颜色格式" v-if="activeData._config_.tag === 'el-color-picker'">
+            <el-select v-model="activeData['color-format']" @change="updateColorFormat" size="large"
+              placeholder="请选择颜色格式">
+              <el-option label="hsl" value="hsl" />
+              <el-option label="hsv" value="hsv" />
+              <el-option label="hex" value="hex" />
+              <el-option label="rgb" value="rgb" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="分隔符" v-if="activeData['range-separator'] !== undefined">
+            <el-input v-model="activeData['range-separator']" placeholder="请输入分隔符" />
+          </el-form-item>
+          <el-form-item label="时间格式" v-if="activeData.format !== undefined">
+            <el-input :modelValue="activeData.format" @update:modelValue="setTimeValue" placeholder="请输入时间格式" />
           </el-form-item>
           <el-form-item label="开启提示" v-if="activeData._config_.tag === 'el-switch'">
             <el-input v-model="activeData['active-text']" placeholder="请输入开启提示" />
@@ -120,7 +187,9 @@
               <template #append>个字符</template>
             </el-input>
           </el-form-item>
-
+          <el-form-item label="按钮文字" v-if="activeData._config_.tag === 'el-upload'">
+            <el-input v-model="activeData._slot_.default" placeholder="请输入按钮文字" />
+          </el-form-item>
           <template v-if="isShowOptions">
             <el-divider>选项</el-divider>
             <draggable class="drawing-board" :list="activeData._slot_.default" item-key="right-components"
@@ -154,6 +223,13 @@
             <el-divider />
           </template>
 
+          <el-form-item label="列表类型" v-if="activeData._config_.tag === 'el-upload'">
+            <el-radio-group v-model="activeData['list-type']" size="default">
+              <el-radio-button label="text"></el-radio-button>
+              <el-radio-button label="picture"></el-radio-button>
+              <el-radio-button label="picture-card"></el-radio-button>
+            </el-radio-group>
+          </el-form-item>
           <el-form-item label="按钮位置" v-if="activeData['controls-position'] !== undefined">
             <el-radio-group v-model="activeData['controls-position']" size="large">
               <el-radio-button label="">默认</el-radio-button>
@@ -169,6 +245,24 @@
           <el-form-item label="显示标签" v-if="activeData._config_.showLabel !== undefined
             && activeData._config_.labelWidth !== undefined">
             <el-switch v-model="activeData._config_.showLabel" />
+          </el-form-item>
+          <el-form-item label="显示提示" v-if="activeData._config_.tag === 'el-upload'">
+            <el-switch v-model="activeData._slot_.tip" />
+          </el-form-item>
+          <el-form-item label="多选文件" v-if="activeData._config_.tag === 'el-upload'">
+            <el-switch v-model="activeData.multiple" />
+          </el-form-item>
+          <el-form-item label="自动上传" v-if="activeData._config_.tag === 'el-upload'">
+            <el-switch v-model="activeData['auto-upload']" />
+          </el-form-item>
+          <el-form-item label="支持透明度" v-if="activeData._config_.tag === 'el-color-picker'">
+            <el-switch v-model="activeData['show-alpha']" @change="updateColorFormat" />
+          </el-form-item>
+          <el-form-item label="允许半选" v-if="activeData['allow-half'] !== undefined">
+            <el-switch v-model="activeData['allow-half']" />
+          </el-form-item>
+          <el-form-item label="显示分数" v-if="activeData['show-score'] !== undefined">
+            <el-switch v-model="activeData['show-score']" />
           </el-form-item>
           <el-form-item label="显示间断点" v-if="activeData['show-stops'] !== undefined">
             <el-switch v-model="activeData['show-stops']" />
@@ -262,12 +356,12 @@
   </div>
 </template>
 <script setup lang="jsx">
-import { defineProps, ref, reactive, defineEmits, computed } from 'vue'
+import { defineProps, ref, reactive, defineEmits, computed, nextTick } from 'vue'
 import { inputComponents, selectComponents, } from '@/components/generator/config.js'
 import IconsDialog from './IconsDialog.vue';
 import draggable from "vuedraggable";
 import TreeNodeDialog from './TreeNodeDialog.vue';
-import { isNumberStr } from '@/utils';
+import { isNumberStr, deepClone } from '@/utils';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
@@ -275,6 +369,20 @@ const iconsVisible = ref(false);
 const currentIconModel = ref(null);
 const dialogVisible = ref(false);
 const currentNode = ref(null);
+const dateTimeFormat = {
+  'date': 'YYYY-MM-DD',
+  'week': 'YYYY 第 ww 周',
+  'month': 'YYYY-MM',
+  'year': 'YYYY',
+  'datetime': 'YYYY-MM-DD HH:mm:ss',
+  'daterange': 'YYYY-MM-DD',
+  'monthrange': 'YYYY-MM',
+  'datetimerange': 'YYYY-MM-DD HH:mm:ss'
+}
+const test = (file) => {
+  console.log(file);
+  console.log('123123123123');
+}
 const openIconsDialog = (way) => {
   iconsVisible.value = true;
   currentIconModel.value = way;
@@ -299,7 +407,7 @@ const isShowMin = computed(() => {
   return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
 })
 const isShowMax = computed(() => {
-  return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
+  return ['el-input-number', 'el-slider', 'el-rate'].indexOf(props.activeData._config_.tag) > -1
 })
 const isShowStep = computed(() => {
   return ['el-input-number', 'el-slider'].indexOf(props.activeData._config_.tag) > -1
@@ -369,6 +477,22 @@ const onDefaultTime = (arr) => {
   props.activeData['disabled-hours'] = [arr[0].getHours(), arr[1].getHours()]
   props.activeData['disabled-minutes'] = [arr[0].getMinutes(), arr[1].getMinutes()]
   props.activeData['disabled-seconds'] = [arr[0].getSeconds(), arr[1].getSeconds()]
+}
+const setTimeValue = (val, type) => {
+  const valueFormat = type === 'week' ? 'YYYY-MM-DD' : val;
+  props.activeData._config_.defaultValue = '';
+  props.activeData['value-format'] = valueFormat;
+  props.activeData.format = val;
+}
+const changeFormat = (val) => {
+  setTimeValue(dateTimeFormat[val], val);
+}
+const updateColorFormat = () => {
+  props.activeData._config_.defaultValue = null;
+  props.activeData._config_.tag = 'div';
+  nextTick(() => {
+    props.activeData._config_.tag = 'el-color-picker'; //强制刷新
+  })
 }
 </script>
 <style scoped lang='scss'>
