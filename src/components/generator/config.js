@@ -37,6 +37,10 @@ export const inputComponents = [
       showLabel: true,
       required: true,
     },
+    autosize: {
+      minRows: 4,
+      maxRows: 4
+    },
     type: "textarea",
     placeholder: '请输入多行文本',
     maxlength: null,
@@ -96,10 +100,14 @@ export const inputComponents = [
     _config_: {
       layout: 'colItem',
       label: '编辑器',
-      tag: "el-input",
+      tag: "tinymce",
       tagIcon: "rich-text",
-      type: "textarea"
+      showLabel: true,
+      labelWidth: null,
+      defaultValue: null,
+      required: true,
     },
+    placeholder: '请输入',
   },
 ]
 
@@ -466,7 +474,17 @@ export const layoutComponents = [
       label: '按钮',
       tag: "el-button",
       tagIcon: "button",
-    }
+      labelWidth: null,
+      showLabel: true,
+    },
+    _slot_: {
+      default: '主要按钮',
+    },
+    icon: 'Search',
+    type: 'primary',
+    size: 'large',
+    disabled: false,
+
   },
 ]
 
@@ -480,4 +498,5 @@ export const formConf = {
   span: 24,
   disabled: false,
   gutter: 15,
+  unFocusedComponentBorder: false,
 }

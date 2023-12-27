@@ -10,9 +10,6 @@
         <!-- 组件属性 -->
         <el-form v-show="activeName === 'field' && showField" label-width="90px">
           {{ activeData }}
-          <el-upload action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15" :beforeUpload="test">
-            <el-button type="primary">上传</el-button>
-          </el-upload>
           <el-form-item label="组件类型">
             <el-select v-model="activeData._config_.tagIcon" @change="tagChange">
               <el-option-group v-for="group in tagList" :key="group.title" :label="group.title">
@@ -51,9 +48,12 @@
           <el-form-item label="组件宽度" v-if="activeData.style && activeData.style.width !== undefined">
             <el-input v-model="activeData.style.width" placeholder="请输入组件宽度" />
           </el-form-item>
-          <el-form-item label="默认值">
+          <el-form-item label="默认值" v-if="activeData._config_.defaultValue !== undefined">
             <el-input :modelValue="setDefaultValue(activeData._config_.defaultValue)"
               @update:modelValue="onDefaultValueInput" placeholder="请输入默认值" />
+          </el-form-item>
+          <el-form-item label="按钮文字" v-if="activeData._config_.tag === 'el-button'">
+            <el-input v-model="activeData._slot_.default" placeholder="请输入按钮文字" />
           </el-form-item>
           <el-form-item label="文件字段名" v-if="activeData._config_.tag === 'el-upload'">
             <el-input v-model="activeData.name" placeholder="请输入文件字段名" />
@@ -107,6 +107,16 @@
               </template>
             </el-select>
           </el-form-item>
+          <el-form-item label="按钮类型" v-if="activeData._config_.tag === 'el-button'">
+            <el-select v-model="activeData.type" size="large" placeholder="请选择按钮类型">
+              <el-option label="primary" value="primary" />
+              <el-option label="success" value="success" />
+              <el-option label="warning" value="warning" />
+              <el-option label="danger" value="danger" />
+              <el-option label="info" value="info" />
+              <el-option label="text" value="text" />
+            </el-select>
+          </el-form-item>
           <el-form-item label="颜色格式" v-if="activeData._config_.tag === 'el-color-picker'">
             <el-select v-model="activeData['color-format']" @change="updateColorFormat" size="large"
               placeholder="请选择颜色格式">
@@ -154,6 +164,12 @@
           <el-form-item label="最大值" v-if="isShowMax">
             <el-input-number v-model="activeData.max" :min="0" placeholder="最大值" />
           </el-form-item>
+          <el-form-item label="最小行数" v-if="activeData.autosize !== undefined">
+            <el-input-number v-model="activeData.autosize.minRows" :min="1" placeholder="最小行数" />
+          </el-form-item>
+          <el-form-item label="最大行数" v-if="activeData.autosize !== undefined">
+            <el-input-number v-model="activeData.autosize.maxRows" :min="1" placeholder="最大行数" />
+          </el-form-item>
           <el-form-item label="步长" v-if="isShowStep">
             <el-input-number v-model="activeData.step" placeholder="步长" />
           </el-form-item>
@@ -165,6 +181,14 @@
           </el-form-item>
           <el-form-item label="后缀" v-if="activeData._slot_ && activeData._slot_.append !== undefined">
             <el-input v-model="activeData._slot_.append" placeholder="请输入后缀" />
+          </el-form-item>
+          <el-form-item label="按钮图标" v-if="activeData._config_.tag === 'el-button'">
+            <el-input v-model="activeData.icon" placeholder="请选择按钮图标" readonly>
+              <template #append>
+                <el-button icon="Pointer" @click="openIconsDialog('icon')">
+                  选择</el-button>
+              </template>
+            </el-input>
           </el-form-item>
           <el-form-item label="前图标" v-if="activeData['prefix-icon'] !== undefined">
             <el-input v-model="activeData['prefix-icon']" placeholder="请选择前图标" readonly>
@@ -243,7 +267,8 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item label="显示标签" v-if="activeData._config_.showLabel !== undefined
-            && activeData._config_.labelWidth !== undefined">
+            && activeData._config_.labelWidth !== undefined
+            ">
             <el-switch v-model="activeData._config_.showLabel" />
           </el-form-item>
           <el-form-item label="显示提示" v-if="activeData._config_.tag === 'el-upload'">
@@ -319,7 +344,7 @@
           </el-form-item>
         </el-form>
         <!-- 表单属性 -->
-        <el-form v-show="activeName === 'form'" label-width="90px">
+        <el-form v-show="activeName === 'form'" label-width="90px" class="right-form">
           <el-form-item label="表单名">
             <el-input v-model="formConf.formRef" placeholder="请输入表单名" />
           </el-form-item>
@@ -334,7 +359,7 @@
             </el-radio-group>
           </el-form-item>
           <el-form-item label="标签对齐">
-            <el-radio-group v-model="formConf.labelPositon">
+            <el-radio-group v-model="formConf.labelPosition">
               <el-radio-button label="left">左对齐</el-radio-button>
               <el-radio-button label="right">右对齐</el-radio-button>
               <el-radio-button label="top">顶部对齐</el-radio-button>
@@ -343,8 +368,14 @@
           <el-form-item label="标签宽度">
             <el-input type="number" v-model="formConf.labelWidth" :min="1" placeholder="请输入标签宽度" />
           </el-form-item>
-          <el-form-item label="栅格间隔">
+          <!-- <el-form-item label="栅格间隔">
             <el-input-number v-model="formConf.gutter" :min="0" placeholder="栅格间隔" />
+          </el-form-item> -->
+          <el-form-item label="禁用表单">
+            <el-switch v-model="formConf.disabled" />
+          </el-form-item>
+          <el-form-item label="显示未选中组件边框">
+            <el-switch v-model="formConf.unFocusedComponentBorder" />
           </el-form-item>
         </el-form>
       </el-scrollbar>
@@ -378,10 +409,6 @@ const dateTimeFormat = {
   'daterange': 'YYYY-MM-DD',
   'monthrange': 'YYYY-MM',
   'datetimerange': 'YYYY-MM-DD HH:mm:ss'
-}
-const test = (file) => {
-  console.log(file);
-  console.log('123123123123');
 }
 const openIconsDialog = (way) => {
   iconsVisible.value = true;

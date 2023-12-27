@@ -7,10 +7,13 @@ import router from '@/router'
 import store from '@/store'
 import '@/icons/index.js'
 import SvgIcon from '@/components/svgIcon/SvgIcon.vue';
-// import './icon.js'
+import MyTinymce from '@/components/tinymce/MyTinymce.vue'
+
+
 
 const app = createApp(App);
 app.component('svg-icon', SvgIcon);
+app.component('Tinymce', MyTinymce);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }

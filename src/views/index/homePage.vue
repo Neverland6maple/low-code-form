@@ -31,6 +31,9 @@
     </div>
     <div class="center-board">
       <div class="action-bar">
+        <el-button text icon="VideoPlay" @click="run">
+          运行
+        </el-button>
         <el-button text icon="view" @click="showJson">
           查看JSON
         </el-button>
@@ -47,7 +50,7 @@
               :animation="340">
               <template #item="{ element, index }">
                 <draggable-item :currentItem="element" :index="index" :activeId="activeId" :list="drawingList"
-                  @activeItem="activeFormItem" @copyItem="copyItem" @deleteItem="deleteItem" />
+                  @activeItem="activeFormItem" @copyItem="copyItem" @deleteItem="deleteItem" :formConf="formConf" />
               </template>
             </draggable>
             <div class="empty-info" v-if="!drawingList.length">
@@ -60,13 +63,15 @@
     </div>
     <RightPanel :activeData="activeData" :showField="!!drawingList.length" :formConf="formConf" @tag-change="tagChange">
     </RightPanel>
-    <JsonDrawer size="60%" :jsonStr="JSON.stringify(formData)" v-model="dialogVisible" @refresh="refreshJson">
+    <FormDrawer v-model="drawerVisible" size="100%" :form-data="formData"></FormDrawer>
+    <JsonDrawer size="60%" :jsonStr="JSON.stringify(formData)" v-model="jsonDrawerVisible" @refresh="refreshJson">
     </JsonDrawer>
+    <CodeTypeDialog v-model="dialogVisible" title="选择生产类型" @confirm="generate"></CodeTypeDialog>
   </div>
 </template>
 
 <script setup>
-import { getCurrentInstance, reactive, ref, onMounted, nextTick } from 'vue'
+import { reactive, ref, onMounted, nextTick } from 'vue'
 import draggable from "vuedraggable";
 import RightPanel from './RightPanel.vue';
 import DraggableItem from './DraggableItem'
@@ -75,7 +80,8 @@ import { deepClone } from '@/utils/index'
 import { getIdGlobal } from '@/utils/db'
 import { ElNotification } from 'element-plus'
 import JsonDrawer from './JsonDrawer.vue';
-
+import CodeTypeDialog from './CodeTypeDialog.vue';
+import FormDrawer from './FormDrawer.vue';
 const leftComponents = reactive([{
   title: '输入型组件',
   list: inputComponents
@@ -94,6 +100,9 @@ const tempActiveData = ref({});
 const activeData = ref({ _config_: {}, _slot_: {} });
 const activeId = ref(null);
 const idGlobal = ref(getIdGlobal());
+const drawerVisible = ref(false);
+const jsonDrawerVisible = ref(false);
+const operationType = ref('');
 const arr = reactive([{ level: 1, context: 'fuck you' },
 { level: 2, context: 'you' },
 { level: 3, context: 'damn!' }]);
@@ -152,11 +161,10 @@ const deleteItem = (index, list) => {
 }
 const assembleFormData = () => {
   formData.value = Object.assign({ fields: deepClone(drawingList) }, formConf.value);
-  console.log(formData.value);
 }
 const showJson = () => {
   assembleFormData();
-  dialogVisible.value = true;
+  jsonDrawerVisible.value = true;
 }
 const refreshJson = (json) => {
   try {
@@ -172,10 +180,23 @@ const refreshJson = (json) => {
     })
   }
 }
-
 const tagChange = (target) => {
   activeData.value._config_.tag = target._config_.tag;
   activeData.value._config_.type = target._config_.type;
+}
+const excObj = {
+  excrun: () => {
+    assembleFormData();
+    drawerVisible.value = true;
+  }
+}
+const run = () => {
+  dialogVisible.value = true;
+  operationType.value = 'run';
+}
+const generate = (data) => {
+  const fnc = excObj[`exc${operationType.value}`];
+  fnc && fnc(data)
 }
 
 </script>

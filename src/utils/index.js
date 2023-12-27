@@ -49,7 +49,7 @@ export const beautifierConf = {
     indent_inner_html: true,
     comma_first: false,
     e4x: true,
-    indent_empty_lines: true
+    indent_empty_lines: true,
   },
   js: {
     indent_size: '2',
@@ -75,4 +75,10 @@ export const beautifierConf = {
 export const isNumberStr = (str) => {
   if (str === '') return false;
   return !isNaN(str);
+}
+
+export function buildShortUUID(prefix = '') {
+  const time = Date.now()
+  const random = Math.floor(Math.random() * 1000000000)
+  return prefix + '_' + random + String(time)
 }

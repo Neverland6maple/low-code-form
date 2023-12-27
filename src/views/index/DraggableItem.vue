@@ -24,11 +24,12 @@ const layouts = {
     const conf = item._config_;
     const { onActiveItem } = this.$attrs;
     const className = this.activeId === conf.formId ? 'drawing-item active-from-item' : 'drawing-item';
+    const classNameItem = this.formConf.unFocusedComponentBorder ? ' unfocus-border' : '';
     const labelWidth = conf.showLabel ? conf.labelWidth ? conf.labelWidth + 'px' : '' : '0px';
     const label = conf.showLabel ? conf.label : '';
     return <el-col onClick={e => { onActiveItem(item); e.stopPropagation(); }} class={className} span={conf.span}>
       <el-form-item for={"stopPropagation"} label={label} label-width={labelWidth}
-        required={conf.required}>
+        required={conf.required} class={classNameItem}>
         <render item={item} v-model={conf.defaultValue}></render>
       </el-form-item>
       {components.itemBtns.apply(this, arguments)}
@@ -48,7 +49,7 @@ const layouts = {
           v-slots={{
             item: ({ element, index }) => {
               return <draggable-item currentItem={element} activeId={this.activeId} list={conf.children} index={index}
-                onActiveItem={onActiveItem} onCopyItem={onCopyItem} onDeleteItem={onDeleteItem}></draggable-item>
+                onActiveItem={onActiveItem} onCopyItem={onCopyItem} onDeleteItem={onDeleteItem} formConf={this.formConf} ></draggable-item>
             }
           }
           } >
@@ -60,7 +61,7 @@ const layouts = {
 }
 
 export default {
-  props: ['currentItem', 'activeId', 'list', 'index'],
+  props: ['currentItem', 'activeId', 'list', 'index', 'formConf'],
   name: 'draggableItem',
   render(context) {
     // return <h1>text</h1>

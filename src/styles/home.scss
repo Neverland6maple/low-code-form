@@ -178,10 +178,15 @@ $lighterBlue: #409EFF;
   .el-form-item {
     border-radius: 6px;
 
+    &.unfocus-border {
+      border: 1px dashed #ccc;
+    }
+
   }
 
   &.active-from-item .el-form-item {
     background-color: $selectedColor;
+    border: none;
   }
 
   &:hover .el-form-item {
@@ -254,5 +259,13 @@ $lighterBlue: #409EFF;
       }
     }
   }
+}
 
+:deep(.right-form) {
+  .el-form-item:last-child {
+    .el-form-item__label {
+      height: auto;
+      text-align: right;
+    }
+  }
 }

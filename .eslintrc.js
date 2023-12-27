@@ -17,5 +17,6 @@ module.exports = {
     'vue/no-parsing-error': [2, { "x-invalid-end-tag": false }],
     'no-empty': 1,
     'vue/no-mutating-props': 0,
+    'vue/multi-word-component-names': 1,
   }
 }

@@ -5,6 +5,7 @@ import {
   ElSwitch, ElTimePicker, ElUpload, ElTimeSelect, ElMessage
 } from 'element-plus';
 import { deepClone } from '@/utils';
+import tinymce from '@/components/tinymce/MyTinymce.vue'
 const mapping = {
   'el-input': ElInput,
   'el-button': ElButton,
@@ -21,6 +22,7 @@ const mapping = {
   'el-time-picker': ElTimePicker,
   'el-upload': ElUpload,
   'el-time-select': ElTimeSelect,
+  'tinymce': tinymce,
 }
 const componentChild = {};
 const slotsFiles = require.context('./slots', false, /\.js$/);

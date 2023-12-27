@@ -6,7 +6,7 @@
         <el-button text icon="view" @click="refresh">
           刷新
         </el-button>
-        <el-button text icon="view" class="abc">
+        <el-button text icon="view" class="copy-btn">
           复制JSON
         </el-button>
         <el-button text icon="view">
@@ -21,10 +21,9 @@
   </div>
 </template>
 <script setup>
-import { useAttrs, ref, computed, watch, defineEmits, defineProps, toRaw, nextTick } from 'vue'
+import { useAttrs, ref, computed, watch, defineEmits, defineProps, toRaw, nextTick, onMounted } from 'vue'
 import * as monaco from 'monaco-editor'
 import beautify from "js-beautify";
-import { onMounted } from 'vue';
 import { beautifierConf } from '@/utils/index'
 import ClipboardJS from 'clipboard'
 import { ElNotification } from 'element-plus'
@@ -37,7 +36,7 @@ const beautifierJson = ref('')
 let clipboard;
 const onOpen = () => {
   if (!clipboard) {
-    const clipboard = new ClipboardJS(document.querySelector('.abc'), {
+    const clipboard = new ClipboardJS(document.querySelector('.copy-btn'), {
       text: trigger => {
         ElNotification({
           title: '成功',
