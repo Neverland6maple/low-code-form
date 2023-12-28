@@ -156,7 +156,7 @@
             <el-input-number v-model="activeData.min" :min="0" placeholder="至少应选" />
           </el-form-item>
           <el-form-item label="最多可选" v-if="activeData._config_.tag === 'el-checkbox-group'">
-            <el-input-number v-model="activeData.min" :min="0" placeholder="最多可选" />
+            <el-input-number v-model="activeData.max" :min="0" placeholder="最多可选" />
           </el-form-item>
           <el-form-item label="最小值" v-if="isShowMin">
             <el-input-number v-model="activeData.min" :min="0" placeholder="最小值" />
