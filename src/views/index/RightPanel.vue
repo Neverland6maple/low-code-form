@@ -85,7 +85,7 @@
             <el-input v-model="activeData.action" placeholder="请输入上传地址" />
           </el-form-item>
           <el-form-item label="时间段"
-            v-if="activeData._config_.tag === 'el-time-picker' && activeData['is-range' === undefined]">
+            v-if="activeData._config_.tag === 'el-time-picker' && activeData['is-range'] === undefined && (activeData._config_.defaultValue instanceof Date || activeData._config_.defaultValue === '')">
             <el-time-picker
               :modelValue="setDefaultTime(activeData['disabled-hours'], activeData['disabled-minutes'], activeData['disabled-seconds'])"
               @update:modelValue="onDefaultTime" is-range range-separator="至" start-placeholder="Start time"
@@ -393,6 +393,7 @@ import IconsDialog from './IconsDialog.vue';
 import draggable from "vuedraggable";
 import TreeNodeDialog from './TreeNodeDialog.vue';
 import { isNumberStr, deepClone } from '@/utils';
+import dayjs from 'dayjs';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
 const activeName = ref('field')
@@ -478,6 +479,8 @@ const setDefaultValue = (val) => {
     return val + '';
   } else if (Array.isArray(val)) {
     return val.join(',');
+  } else if (val instanceof Date) {
+    return dayjs(val).format(props.activeData.format)
   }
   return val;
 }
@@ -508,7 +511,7 @@ const onDefaultTime = (arr) => {
 const setTimeValue = (val, type) => {
   const valueFormat = type === 'week' ? 'YYYY-MM-DD' : val;
   props.activeData._config_.defaultValue = '';
-  props.activeData['value-format'] = valueFormat;
+  if (props.activeData['is-range'] !== undefined || props.activeData._config_.tag !== 'el-time-picker') props.activeData['value-format'] = valueFormat;
   props.activeData.format = val;
 }
 const changeFormat = (val) => {

@@ -20,7 +20,7 @@ export const deepClone = (obj) => {
   }
   //Date
   if (type === '[object Date]') {
-    return new Date(new obj.getTime())
+    return new Date(obj.getTime());
   }
   const o = Array.isArray(obj) ? [] : obj.constructor ? new obj.constructor() : {};
 

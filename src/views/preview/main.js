@@ -9,14 +9,12 @@ const $previewApp = document.querySelector('#previewApp')
 
 function init(event) {
   if (event.data.type !== 'refreshFrame') return;
-  console.log(event.data.data);
   $previewApp.innerHTML = `<div id="app"></div>`
   const main = eval(`(${event.data.data.js})`);
   main.template = `<div>{{formData.a}}{{str }}
     <el-button>123123</el-button>
     ${event.data.data.html}
   </div>`
-  // console.log(main.data());
 
   newVue(main);
 }

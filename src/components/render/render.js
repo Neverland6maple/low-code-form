@@ -87,9 +87,9 @@ function buildDataObject(item) {
       vModel.call(this, clone, item._config_.defaultValue);
     } else if (key === 'disabled-hours' || key === 'disabled-minutes' || key === 'disabled-seconds') {
       clone[key] = () => {
-        if (item._config_.defaultValue === '') return;
+        if (!(item._config_.defaultValue instanceof Date)) return;
         const total = key === 'disabled-hours' ? 24 : 60;
-        let arr;
+        let arr = [];
         const h = item._config_.defaultValue.getHours();
         const m = item._config_.defaultValue.getMinutes();
         const s = item._config_.defaultValue.getSeconds();
@@ -102,8 +102,8 @@ function buildDataObject(item) {
             arr = makeRange(0, item[key][1]);
           }
         } else if (key === 'disabled-seconds') {
-          arr = makeRange(0, 59);
           if (h > item['disabled-hours'][0] && h < item['disabled-hours'][1]) {
+            arr = makeRange(0, 59);
           } else if (h === item['disabled-hours'][0]) {
             if (m > item['disabled-minutes'][0]) {
               arr = makeRange(0, 59);

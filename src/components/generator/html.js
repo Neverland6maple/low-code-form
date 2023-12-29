@@ -76,6 +76,54 @@ const tags = {
     const style = `:style='{${scheme.style['--el-switch-on-color'] !== undefined ? '"--el-switch-on-color":"' + scheme.style['--el-switch-on-color'] + '",' : ''}${scheme.style['--el-switch-off-color'] !== undefined ? '"--el-switch-off-color":"' + scheme.style['--el-switch-off-color'] + '"' : ''}}'`
     return `<${tag} ${activeText} ${style} ${inactiveValue} ${activeValue} ${inactiveText} ${disabled} ${vModel} />`
   },
+  ['el-slider'](scheme) {
+    const { tag, disabled, vModel, min, max } = attrBuilder(scheme);
+    const step = scheme.step ? `:step="${scheme.step}"` : '';
+    const showStops = scheme['show-stops'] ? `show-stops` : '';
+    const range = scheme.range ? `range` : '';
+    return `<${tag} ${min} ${max} ${range} ${showStops} ${step} ${disabled} ${vModel} />`
+  },
+  ['el-time-picker'](scheme) {
+    if (scheme['is-range'] === undefined) {
+      const { tag, placeholder, clearable, disabled, style } = attrBuilder(scheme);
+      const vModel = scheme._vModel_ ? `v-model="timeData.${scheme._vModel_}"` : '';
+      const format = `format="${scheme.format}"`;
+      const disabledHours = `:disabled-hours="buildLimitTime('${scheme._vModel_}','disabled-hours')"`;
+      const disabledMinutes = `:disabled-minutes="buildLimitTime('${scheme._vModel_}','disabled-minutes')"`;
+      const disabledSeconds = `:disabled-seconds="buildLimitTime('${scheme._vModel_}','disabled-seconds')"`;
+      return `<${tag} ${style} ${disabledSeconds} ${disabledMinutes} ${disabledHours} ${clearable} ${placeholder} ${format} ${disabled} ${vModel} />`
+    } else {
+      const { tag, placeholder, clearable, disabled, style, vModel } = attrBuilder(scheme);
+      const isRange = 'is-range';
+      const format = `format="${scheme.format}"`;
+      const valueFormat = `value-format="${scheme.format}"`
+      const startPlaceholder = `start-placeholder="${scheme['start-placeholder']}"`;
+      const endPlaceholder = `end-placeholder="${scheme['end-placeholder']}"`;
+      const rangeSeparator = `range-separator="${scheme['range-separator']}"`;
+      return `<${tag} ${valueFormat} ${rangeSeparator} ${endPlaceholder} ${isRange} ${startPlaceholder} ${style} ${clearable} ${placeholder} ${format} ${disabled} ${vModel} />`
+    }
+  },
+  ['el-date-picker'](scheme) {
+    const { tag, disabled, vModel, type, readonly, clearable, placeholder, style } = attrBuilder(scheme);
+    const format = `format="${scheme.format}"`;
+    const valueFormat = `value-format="${scheme['value-format']}"`;
+    const startPlaceholder = scheme['start-placeholder'] !== undefined ? `start-placeholder="${scheme['start-placeholder']}"` : '';
+    const endPlaceholder = scheme['end-placeholder'] !== undefined ? `end-placeholder="${scheme['end-placeholder']}"` : '';
+    const rangeSeparator = scheme['range-separator'] !== undefined ? `range-separator="${scheme['range-separator']}"` : '';
+    return `<${tag} ${rangeSeparator} ${endPlaceholder} ${startPlaceholder} ${valueFormat} ${format} ${style} ${placeholder} ${clearable} ${readonly} ${type}  ${disabled} ${vModel} />`
+  },
+  ['el-rate'](scheme) {
+    const { tag, disabled, vModel, max } = attrBuilder(scheme);
+    const allowHalf = scheme['allow-half'] ? 'allow-half' : '';
+    const showScore = scheme['show-score'] ? 'show-score' : '';
+    return `<${tag} ${max} ${allowHalf} ${showScore} ${disabled} ${vModel} />`
+  },
+  ['el-color-picker'](scheme) {
+    const { tag, disabled, vModel, size } = attrBuilder(scheme);
+    const showAlpha = scheme['show-alpha'] ? 'show-alpha' : '';
+    const colorFormat = scheme['color-format'] !== '' ? `color-format="${scheme['color-format']}"` : '';
+    return `<${tag} ${showAlpha} ${colorFormat} ${size} ${disabled} ${vModel} />`
+  },
 }
 
 function attrBuilder(el) {
@@ -143,6 +191,7 @@ function buildElCheckboxGroupChild(scheme) {
   })
   return childList.join('\n');
 }
+
 export function makeUpHtml(formConfig) {
   const htmlList = [];
   someSpanIsNot24 = formConfig.fields.some(el => el._config_.span !== 24);
