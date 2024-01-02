@@ -443,8 +443,8 @@ export const selectComponents = [
       sizeUnit: 'MB',
     },
     _slot_: {
-      default: '选择文件',
-      trigger: '上传文件',
+      default: '点击上传',
+      trigger: '选择文件',
       tip: false,
     },
     action: 'https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15',
@@ -453,7 +453,6 @@ export const selectComponents = [
     accept: '',
     multiple: false,
     disabled: false,
-    'testnumber': 123,
     name: 'file',
   }
 ]
@@ -484,7 +483,6 @@ export const layoutComponents = [
     type: 'primary',
     size: 'large',
     disabled: false,
-
   },
 ]
 

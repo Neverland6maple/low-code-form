@@ -75,7 +75,7 @@ function buildDataObject(item) {
       while (turn-- > 0) {
         size /= 1024;
       }
-      if (size < item._config_.fileSize) {
+      if (size <= item._config_.fileSize) {
         return true
       }
       ElMessage.error(`上传文件大小需小于${item._config_.fileSize}${item._config_.sizeUnit}`)

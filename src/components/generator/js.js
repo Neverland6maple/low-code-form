@@ -10,6 +10,33 @@ function buildAttributes(scheme, dataList, optionsList, methodList, timeList) {
   if (scheme._config_.tag === 'el-time-picker' && scheme['is-range'] === undefined) {
     buildLimitTime(scheme, timeList, methodList)
   }
+  if (scheme._config_.fileSize !== undefined) {
+    methodList.push(`beforeAvatarUpload(fileSize, sizeUnit) {
+      return (rawFile) => {
+        let size = rawFile.size;
+        let turn;
+        switch (sizeUnit) {
+          case 'KB':
+            turn = 1;
+            break;
+          case 'MB':
+            turn = 2;
+            break;
+          case 'GB':
+            turn = 3;
+            break;
+        }
+        while (turn-- > 0) {
+          size /= 1024;
+        }
+        if (fileSize >= size) {
+          return true
+        }
+        this.$message.error('上传文件大小需小于' + fileSize + sizeUnit)
+        return false;
+      }
+    }`)
+  }
 }
 
 function buildData(scheme, dataList, timeList) {

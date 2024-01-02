@@ -12,16 +12,16 @@
           <div v-show="activeTab === 'script'" id="editorJs" class="tab-editor" />
           <div v-show="activeTab === 'css'" id="editorCss" class="tab-editor" />
         </el-col>
-        <el-col :span="12">
+        <el-col :span="12" style="overflow: hidden;height:100vh;">
           <div class="action-bar">
             <el-button text icon="view" @click="runCode">
               刷新
             </el-button>
-            <el-button text icon="view" class="copy-btn">
-              复制JSON
-            </el-button>
             <el-button text icon="view">
-              导出JSON文件
+              导出vue文件
+            </el-button>
+            <el-button text icon="view" class="copy-btn">
+              复制代码
             </el-button>
             <el-button text icon="circle-close" @click="$emit('update:modelValue', false)" style="color: #f56c6c;">
               关闭
@@ -34,14 +34,16 @@
   </div>
 </template>
 <script setup>
-import { defineOptions, reactive, defineEmits, ref, toRaw, defineProps } from 'vue';
+import { defineOptions, reactive, defineEmits, ref, toRaw, defineProps, onMounted } from 'vue';
 import * as monaco from 'monaco-editor'
 import beautify from "js-beautify";
 import { beautifierConf } from '@/utils/index'
 import ClipboardJS from 'clipboard'
 import { ElNotification } from 'element-plus'
-import { makeUpHtml } from '@/components/generator/html'
+import { makeUpHtml, vueTemplate, vueScript, cssStyle } from '@/components/generator/html'
 import { makeUpJs } from '@/components/generator/js'
+import { makeUpCss } from '@/components/generator/css'
+import { generateCodeFrame } from '@vue/shared';
 const props = defineProps(['formData']);
 const activeTab = ref('template')
 const editorObj = reactive({
@@ -67,7 +69,8 @@ const runCode = () => {
     type: 'refreshFrame',
     data: {
       html: toRaw(editorObj.html).getValue(),
-      js: toRaw(editorObj.js).getValue().replace('export default ', '')
+      js: toRaw(editorObj.js).getValue().replace('export default ', ''),
+      css: toRaw(editorObj.css).getValue()
     }
   }
   previewPage.value.contentWindow.postMessage(postData, location.origin)
@@ -84,16 +87,42 @@ const setEditorValue = (type, id, lang, code) => {
     toRaw(editorObj[type]).setValue(code);
   }
 }
-
+const generateCode = () => {
+  const html = vueTemplate(toRaw(editorObj.html).getValue());
+  const js = vueScript(toRaw(editorObj.js).getValue());
+  const css = toRaw(editorObj.css).getValue();
+  console.log(beautify.html(html + js + css, beautifierConf.html));
+  return beautify.html(html + js + css, beautifierConf.html);
+}
 const onOpen = () => {
+  if (!clipboard) {
+    const clipboard = new ClipboardJS(document.querySelector('.copy-btn'), {
+      text: trigger => {
+        ElNotification({
+          title: '成功',
+          message: '代码已复制到剪切板，可粘贴。',
+          type: 'success'
+        })
+        return generateCode();
+      }
+    })
+
+    clipboard.on('error', () => {
+      ElNotification({
+        title: '失败',
+        message: '代码复制失败',
+        type: 'error'
+      })
+    })
+  }
+
   htmlCode.value = makeUpHtml(props.formData)
   jsCode.value = makeUpJs(props.formData);
-  // console.log(htmlCode.value);
+  cssCode.value = cssStyle(makeUpCss(props.formData));
 
   htmlCode.value = beautify.html(htmlCode.value, beautifierConf.html);
   jsCode.value = beautify.js(jsCode.value, beautifierConf.js);
-  cssCode.value = beautify.css(`<style>div{margin:0;}</style>;`, beautifierConf.html);
-  // console.log(htmlCode.value);
+  cssCode.value = beautify.css(cssCode.value, beautifierConf.html);
 
   setEditorValue('html', 'editorHtml', 'html', htmlCode.value)
   setEditorValue('js', 'editorJs', 'javascript', jsCode.value)
@@ -109,14 +138,14 @@ const onClose = () => {
 </script>
 <style scoped lang='scss'>
 .result-wrapper {
-  height: 100%;
+  height: calc(100vh - 42px);
   width: 100%;
   overflow: auto;
   box-sizing: border-box;
 }
 
 .tab-editor {
-  height: calc(100vh - 42px)
+  height: calc(100vh - 42px);
 }
 
 .editor-tabs {

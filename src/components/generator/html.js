@@ -12,6 +12,16 @@ const layouts = {
     </el-form-item>`
     str = colWrapper(str, scheme);
     return str;
+  },
+  'rowItem'(scheme) {
+    const child = scheme._config_.children;
+    const tagDom = child.map(item => {
+      return layouts[item._config_.layout](item)
+    })
+    let str = `<el-row>
+      ${scheme.type === 'default' ? `<div>` + tagDom.join('\n') + `</div>` : tagDom.join('\n')}
+    </el-row>`
+    return str;
   }
 }
 
@@ -124,6 +134,27 @@ const tags = {
     const colorFormat = scheme['color-format'] !== '' ? `color-format="${scheme['color-format']}"` : '';
     return `<${tag} ${showAlpha} ${colorFormat} ${size} ${disabled} ${vModel} />`
   },
+  ['el-upload'](scheme) {
+    const { tag, disabled, vModel } = attrBuilder(scheme);
+    const action = `action="${scheme.action}"`;
+    const listType = scheme['list-type'] !== 'text' ? `list-type="${scheme['list-type']}"` : '';
+    const multiple = scheme.multiple ? 'multiple' : '';
+    const autoUpload = !scheme['auto-upload'] ? ':auto-upload="false"' : '';
+    const name = `name="${scheme.name}"`;
+    const accept = scheme.accept !== '' ? `accept="${scheme.accept}"` : '';
+    const child = buildElUploadChild(scheme);
+    const beforeUpload = scheme._config_.fileSize !== undefined ? `:before-upload="beforeAvatarUpload(${scheme._config_.fileSize},'${scheme._config_.sizeUnit}')"` : '';
+    return `<${tag} ${beforeUpload} ${accept} ${name} ${autoUpload} ${multiple} ${listType} ${action} ${disabled} ${vModel}>${child}</${tag}>`
+  },
+  ['el-button'](scheme) {
+    const { tag, disabled, vModel, type, size } = attrBuilder(scheme);
+    const icon = scheme.icon !== undefined ? `icon="${scheme.icon}"` : '';
+    return `<${tag} ${icon} ${type} ${size} ${disabled} ${vModel}>${scheme._slot_.default}</${tag}>`
+  },
+  tinymce(scheme) {
+    const { tag, vModel, placeholder } = attrBuilder(scheme);
+    return `<${tag} ${vModel} ${placeholder} />`
+  }
 }
 
 function attrBuilder(el) {
@@ -158,13 +189,13 @@ function buildFormTemplate(scheme, child, type) {
 }
 
 function colWrapper(str, scheme) {
-  if (someSpanIsNot24 || scheme._config_.span !== 24) {
-    const span = `:span="${scheme._config_.span}"`
-    return `<el-col ${span}>
+  // if (someSpanIsNot24 || scheme._config_.span !== 24) {
+  const span = `:span="${scheme._config_.span}"`
+  return `<el-col ${span}>
       ${str}
     </el-col>`
-  }
-  return str
+  // }
+  // return str
 }
 
 function buildOptions(scheme) {
@@ -191,7 +222,32 @@ function buildElCheckboxGroupChild(scheme) {
   })
   return childList.join('\n');
 }
-
+function buildElUploadChild(scheme) {
+  const childList = [''];
+  if (scheme['list-type'] === 'text') {
+    if (scheme['auto-upload']) {
+      childList.push(`<template #default><el-button type="primary">${scheme._slot_.default}</el-button></template>`)
+    } else {
+      childList.push(`<template #default><el-button type="primary">${scheme._slot_.default}</el-button></template>`)
+    }
+  }
+  if (scheme['list-type'] !== 'text') {
+    childList.push(`<template #trigger><el-icon><Plus /></el-icon></template>`)
+  } else if (!scheme['auto-upload']) {
+    childList.push(`<template #trigger><el-button type="success" style="margin-right:10px">${scheme._slot_.trigger}</el-button></template>`)
+  }
+  if (scheme._slot_.tip) {
+    if (scheme._config_.fileSize) {
+      childList.push(`<template #tip><div>只能上传不超过${scheme._config_.fileSize + scheme._config_.sizeUnit}的${scheme.accept}文件</div></template>`)
+    } else if (scheme.accept) {
+      childList.push(`<template #tip><div>只能上传${scheme.accept}文件</div></template>`)
+    } else {
+      childList.push(`<template #tip><div>选择要上传的文件</div></template>`)
+    }
+  }
+  childList.push('');
+  return childList.join('\n');
+}
 export function makeUpHtml(formConfig) {
   const htmlList = [];
   someSpanIsNot24 = formConfig.fields.some(el => el._config_.span !== 24);
@@ -203,4 +259,19 @@ export function makeUpHtml(formConfig) {
   // console.log(htmlList);
   const str = buildFormTemplate(formConfig, htmlStr)
   return str;
+}
+export function vueTemplate(str) {
+  return `<template>
+  ${str}
+  </template>`
+}
+export function vueScript(str) {
+  return `<script>
+    ${str}
+  </script>`
+}
+export function cssStyle(str) {
+  return `<style>
+    ${str}
+  </style>`
 }

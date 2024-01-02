@@ -155,6 +155,11 @@ $lighterBlue: #409EFF;
   .drag-wrapper {
     min-height: 80px;
     width: 100%;
+
+    &.flex-drag-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+    }
   }
 
   .component-name {

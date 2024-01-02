@@ -1,21 +1,20 @@
 export default {
   default: (slot, item) => {
-    if (item['list-type'] !== 'text') {
-      return <el-icon><Plus /></el-icon>
-    }
-    if (item['auto-upload']) {
-      return () => {
-        return <el-button type="primary">{slot}</el-button>
-      }
-    } else {
-      return () => {
-        return <el-button type="primary">{slot}</el-button>
+    if (item['list-type'] === 'text') {
+      if (item['auto-upload']) {
+        return () => {
+          return <el-button type="primary">{slot}</el-button>
+        }
+      } else {
+        return () => {
+          return <el-button type="primary">{slot}</el-button>
+        }
       }
     }
   },
   trigger: (slot, item) => {
     if (item['list-type'] !== 'text') {
-      return <el-icon><Plus /></el-icon>
+      return () => <el-icon><Plus /></el-icon>
     }
     if (!item['auto-upload']) {
       return () => <el-button type="success" style="margin-right:10px">{slot}</el-button>

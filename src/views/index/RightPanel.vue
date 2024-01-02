@@ -497,7 +497,11 @@ const onDefaultValueInput = (val) => {
   } else if (Array.isArray(props.activeData._config_.defaultValue)) {
     props.activeData._config_.defaultValue = val.split(',')
   } else {
-    props.activeData._config_.defaultValue = isNumberStr(val) ? +val : val;
+    if (props.activeData._config_.tag !== 'tinymce') {
+      props.activeData._config_.defaultValue = isNumberStr(val) ? +val : val;
+    } else {
+      props.activeData._config_.defaultValue = val;
+    }
   }
 }
 const setDefaultTime = (h, m, s) => {

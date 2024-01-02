@@ -44,8 +44,7 @@ const layouts = {
       <el-row class={className} onClick={e => { onActiveItem(item); e.stopPropagation(); }} >
         {/* <el-col span={6}>{JSON.stringify(conf.children)}</el-col> */}
         <span class="component-name">{conf.componentName}</span>
-        <draggable list={conf.children} group="componentsGroup" item-key="row-component" class="drag-wrapper"
-          style={{ display: item.type === 'flex' ? 'flex' : '' }}
+        <draggable list={conf.children} group="componentsGroup" item-key="row-component" class={item.type === 'flex' ? "drag-wrapper flex-drag-wrapper" : "drag-wrapper"}
           v-slots={{
             item: ({ element, index }) => {
               return <draggable-item currentItem={element} activeId={this.activeId} list={conf.children} index={index}
