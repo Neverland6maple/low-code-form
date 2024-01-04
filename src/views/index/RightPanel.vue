@@ -10,7 +10,7 @@
         <!-- 组件属性 -->
         <el-form v-show="activeName === 'field' && showField" label-width="90px">
           {{ activeData }}
-          <el-form-item label="组件类型">
+          <el-form-item label="组件类型" v-if="activeData._config_.layout !== 'rowItem'">
             <el-select v-model="activeData._config_.tagIcon" @change="tagChange">
               <el-option-group v-for="group in tagList" :key="group.title" :label="group.title">
                 <el-option v-for="item in group.list" :key="item._config_.label" :label="item._config_.label"
@@ -342,6 +342,13 @@
           <el-form-item label="是否必填" v-if="activeData._config_.required !== undefined">
             <el-switch v-model="activeData._config_.required" />
           </el-form-item>
+          <template>
+            <el-divider>正则校验</el-divider>
+            <el-button text icon="CirclePlus" @click="activeData._slot_.default.push({ label: '', value: '' })"
+              class="add-options">
+              添加规则
+            </el-button>
+          </template>
         </el-form>
         <!-- 表单属性 -->
         <el-form v-show="activeName === 'form'" label-width="90px" class="right-form">
@@ -387,12 +394,13 @@
   </div>
 </template>
 <script setup lang="jsx">
-import { defineProps, ref, reactive, defineEmits, computed, nextTick } from 'vue'
+import { defineProps, ref, reactive, defineEmits, computed, nextTick, watch } from 'vue'
 import { inputComponents, selectComponents, } from '@/components/generator/config.js'
 import IconsDialog from './IconsDialog.vue';
 import draggable from "vuedraggable";
 import TreeNodeDialog from './TreeNodeDialog.vue';
 import { isNumberStr, deepClone } from '@/utils';
+import { setFormData } from '@/utils/db'
 import dayjs from 'dayjs';
 const props = defineProps(['activeData', 'showField', 'formConf'])
 const emit = defineEmits(['tag-change'])
@@ -424,7 +432,7 @@ const tagList = reactive([{
 }])
 const tagChange = (value) => {
   let target = inputComponents.find(item => item._config_.tagIcon === value);
-  if (!target) selectComponents.find(item => item._config_.tagIcon === value);
+  if (!target) target = selectComponents.find(item => item._config_.tagIcon === value);
   emit('tag-change', target);
 }
 const setIcon = (icon) => {
@@ -528,6 +536,11 @@ const updateColorFormat = () => {
     props.activeData._config_.tag = 'el-color-picker'; //强制刷新
   })
 }
+watch(() => props.formConf, (val) => {
+  setFormData(val);
+}, {
+  deep: true
+})
 </script>
 <style scoped lang='scss'>
 .right-board {

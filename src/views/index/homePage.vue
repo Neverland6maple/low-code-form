@@ -51,8 +51,9 @@
       <el-scrollbar class="center-scrollbar">
         {{ validateForm }}
         <el-row class="center-board-row" :gutter="formConf.gutter">
-          <el-form class="center-board-form" :size="formConf.size" :label-positon="formConf.labelPosition"
-            :disabled="formConf.disabled" :label-width="formConf.labelWidth + 'px'">
+          <el-form class="center-board-form" :model="validateForm" :size="formConf.size"
+            :label-positon="formConf.labelPosition" :disabled="formConf.disabled"
+            :label-width="formConf.labelWidth + 'px'">
             <draggable class="drawing-board" :list="drawingList" group="componentsGroup" item-key="center-components"
               :animation="340">
               <template #item="{ element, index }">
@@ -79,13 +80,13 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, nextTick } from 'vue'
+import { reactive, ref, onMounted, nextTick, watch, toRaw } from 'vue'
 import draggable from "vuedraggable";
 import RightPanel from './RightPanel.vue';
 import DraggableItem from './DraggableItem'
 import { inputComponents, layoutComponents, selectComponents, formConf as tempFormConf } from '@/components/generator/config.js'
 import { deepClone } from '@/utils/index'
-import { getIdGlobal } from '@/utils/db'
+import { getIdGlobal, setDrawingList, getDrawingList, getFormData, setValidateForm, getValidateForm } from '@/utils/db'
 import { ElNotification, ElMessageBox } from 'element-plus'
 import JsonDrawer from './JsonDrawer.vue';
 import CodeTypeDialog from './CodeTypeDialog.vue';
@@ -109,23 +110,19 @@ const leftComponents = reactive([{
   title: '布局型组件',
   list: layoutComponents
 }])
+const drawingList = reactive(getDrawingList());
 const generateConf = ref(null);
 const dialogVisible = ref(false);
 const showFileName = ref(false);
 const formData = ref(null);
-const validateForm = reactive({});
-const formConf = ref(tempFormConf);
+const validateForm = reactive(getValidateForm());
+const formConf = ref(getFormData() || tempFormConf);
 const tempActiveData = ref({});
-const activeData = ref({ _config_: {}, _slot_: {} });
-const activeId = ref(null);
-const idGlobal = ref(getIdGlobal());
+const activeData = ref(drawingList[0] || { _config_: { formId: null }, _slot_: {} });
+const activeId = ref(activeData.value._config_.formId);
 const drawerVisible = ref(false);
 const jsonDrawerVisible = ref(false);
 const operationType = ref('');
-const arr = reactive([{ level: 1, context: 'fuck you' },
-{ level: 2, context: 'you' },
-{ level: 3, context: 'damn!' }]);
-const drawingList = reactive([]);
 const onEnd = (obj) => {
   if (obj.from !== obj.to) {
     activeData.value = tempActiveData.value;
@@ -153,7 +150,7 @@ const cloneComponent = (item) => {
 }
 const createIdAndKey = (item) => {
   const config = item._config_;
-  config.formId = idGlobal.value++;
+  config.formId = +new Date() + '';
   config.renderKey = `${config.formId}${+new Date()}`;
   if (config.layout === 'colItem') {
     item._vModel_ = `field${config.formId}`;
@@ -208,8 +205,33 @@ const refreshJson = (json) => {
   }
 }
 const tagChange = (target) => {
-  activeData.value._config_.tag = target._config_.tag;
-  activeData.value._config_.type = target._config_.type;
+  // activeData.value._config_.tag = target._config_.tag;
+  // activeData.value._config_.type = target._config_.type;
+
+  const newTag = cloneComponent(target);
+  newTag._config_.formId = activeData.value._config_.formId;
+  newTag._vModel_ = activeData.value._vModel_;
+  console.log(newTag);
+
+  Object.keys(toRaw(activeData.value)).forEach(key => {
+    if (!key.startsWith('_') && newTag[key] !== undefined) {
+      newTag[key] = activeData.value[key]
+    }
+  })
+  activeFormItem(newTag);
+  updateDrawingList(newTag, drawingList)
+}
+const updateDrawingList = (item, list) => {
+  const index = list.findIndex(el => el._config_.formId === item._config_.formId)
+  if (index > -1) {
+    list.splice(index, 1, item);
+  } else {
+    list.forEach(el => {
+      if (el.children !== undefined) {
+        updateDrawingList(item, el.children)
+      }
+    })
+  }
 }
 const generateCode = (formData, type) => {
   const html = vueTemplate(makeUpHtml(formData, type));
@@ -289,6 +311,16 @@ onMounted(() => {
       })
     })
   }
+})
+watch(drawingList, (val) => {
+  setDrawingList(val);
+}, {
+  deep: true
+})
+watch(validateForm, (val) => {
+  setValidateForm(val);
+}, {
+  deep: true
 })
 </script>
 <style lang='scss' scoped>

@@ -66,6 +66,7 @@ import { makeUpJs } from '@/components/generator/js'
 import { makeUpCss } from '@/components/generator/css'
 import { saveAs } from 'file-saver'
 const { proxy } = getCurrentInstance();
+defineOptions({ inheritAttrs: false });
 const props = defineProps(['formData', 'generateConf']);
 const activeTab = ref('template')
 const editorObj = reactive({
@@ -78,7 +79,6 @@ const jsCode = ref('')
 const cssCode = ref('')
 const isInitcode = ref(false);
 let clipboard;
-defineOptions({ inheritAttrs: false });
 const emit = defineEmits('')
 const previewPage = ref(null)
 const iframeLoad = () => {

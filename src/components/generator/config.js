@@ -10,7 +10,7 @@ export const inputComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
-      regList: [{ required: true, message: 'age is required' }]
+      regList: [{ required: true, message: 'age is required', tigger: 'blur' }]
     },
     _slot_: {
       prepend: '',

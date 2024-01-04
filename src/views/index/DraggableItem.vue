@@ -27,9 +27,10 @@ const layouts = {
     const classNameItem = this.formConf.unFocusedComponentBorder ? ' unfocus-border' : '';
     const labelWidth = conf.showLabel ? conf.labelWidth ? conf.labelWidth + 'px' : '' : '0px';
     const label = conf.showLabel ? conf.label : '';
+    // const regList =  ? conf.regList : null;
     return <el-col onClick={e => { onActiveItem(item); e.stopPropagation(); }} class={className} span={conf.span}>
       <el-form-item for={"stopPropagation"} label={label} label-width={labelWidth}
-        required={conf.required} class={classNameItem}>
+        required={conf.required} class={classNameItem} rules={conf.regList} prop={conf.formId}>
         <render item={item} v-model={conf.defaultValue}></render>
       </el-form-item>
       {components.itemBtns.apply(this, arguments)}
