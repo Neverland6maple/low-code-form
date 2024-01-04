@@ -248,7 +248,16 @@ function buildElUploadChild(scheme) {
   childList.push('');
   return childList.join('\n');
 }
-export function makeUpHtml(formConfig) {
+function buildDialog(str) {
+  return `<el-dialog v-bind="$attrs" @open="onOpened" :title="$attrs.title || '默认标题'">
+    ${str}
+    <template #footer>
+      <el-button @click="$emit('update:modelValue',false)">取消</el-button>
+      <el-button type="primary">确认</el-button>
+    </template>
+  </el-dialog>`
+}
+export function makeUpHtml(formConfig, type) {
   const htmlList = [];
   someSpanIsNot24 = formConfig.fields.some(el => el._config_.span !== 24);
 
@@ -257,7 +266,10 @@ export function makeUpHtml(formConfig) {
   });
   const htmlStr = htmlList.join('\n');
   // console.log(htmlList);
-  const str = buildFormTemplate(formConfig, htmlStr)
+  let str = buildFormTemplate(formConfig, htmlStr);
+  if (type === 'dialog') {
+    str = buildDialog(str)
+  }
   return str;
 }
 export function vueTemplate(str) {

@@ -17,7 +17,7 @@
               :group="{ name: 'componentsGroup', pull: 'clone', put: false }" item-key="left-components" @end="onEnd"
               :clone="cloneComponent">
               <template #item="{ element }">
-                <div class="component-item">
+                <div class="component-item" @click="addComponent(element)">
                   <div class="component-body">
                     <svg-icon :icon-class="element._config_.tagIcon"></svg-icon>
                     <span class="component-label">{{ element._config_.label }}</span>
@@ -37,8 +37,15 @@
         <el-button text icon="view" @click="showJson">
           查看JSON
         </el-button>
-        <el-button plain icon="view">
-          查看JSON
+        <el-button text icon="Download" @click="download">
+          导出vue文件
+        </el-button>
+        <el-button text icon="DocumentCopy" @click="copy">
+          复制代码
+          <input id="copyNode" type="hidden">
+        </el-button>
+        <el-button text icon="Delete" @click="empty" style="color: #F56C6C;">
+          清空
         </el-button>
       </div>
       <el-scrollbar class="center-scrollbar">
@@ -63,10 +70,11 @@
     </div>
     <RightPanel :activeData="activeData" :showField="!!drawingList.length" :formConf="formConf" @tag-change="tagChange">
     </RightPanel>
-    <FormDrawer v-model="drawerVisible" size="100%" :form-data="formData"></FormDrawer>
+    <FormDrawer :generateConf="generateConf" v-model="drawerVisible" size="100%" :form-data="formData"></FormDrawer>
     <JsonDrawer size="60%" :jsonStr="JSON.stringify(formData)" v-model="jsonDrawerVisible" @refresh="refreshJson">
     </JsonDrawer>
-    <CodeTypeDialog v-model="dialogVisible" title="选择生产类型" @confirm="generate"></CodeTypeDialog>
+    <CodeTypeDialog v-model="dialogVisible" :show-file-name="showFileName" title="选择生产类型" @confirm="generate">
+    </CodeTypeDialog>
   </div>
 </template>
 
@@ -78,10 +86,19 @@ import DraggableItem from './DraggableItem'
 import { inputComponents, layoutComponents, selectComponents, formConf as tempFormConf } from '@/components/generator/config.js'
 import { deepClone } from '@/utils/index'
 import { getIdGlobal } from '@/utils/db'
-import { ElNotification } from 'element-plus'
+import { ElNotification, ElMessageBox } from 'element-plus'
 import JsonDrawer from './JsonDrawer.vue';
 import CodeTypeDialog from './CodeTypeDialog.vue';
 import FormDrawer from './FormDrawer.vue';
+import { makeUpHtml, vueTemplate, vueScript, cssStyle } from '@/components/generator/html';
+import { makeUpJs } from '@/components/generator/js';
+import { makeUpCss } from '@/components/generator/css';
+import beautify from "js-beautify";
+import { beautifierConf } from '@/utils/index';
+import { saveAs } from 'file-saver'
+import ClipboardJS from 'clipboard'
+
+let clipboard;
 const leftComponents = reactive([{
   title: '输入型组件',
   list: inputComponents
@@ -92,7 +109,9 @@ const leftComponents = reactive([{
   title: '布局型组件',
   list: layoutComponents
 }])
+const generateConf = ref(null);
 const dialogVisible = ref(false);
+const showFileName = ref(false);
 const formData = ref(null);
 const validateForm = reactive({});
 const formConf = ref(tempFormConf);
@@ -114,6 +133,14 @@ const onEnd = (obj) => {
     if (tempActiveData.value._config_.layout !== 'rowItem') {
       validateForm[tempActiveData.value._config_.formId] = tempActiveData.value._config_.defaultValue;
     }
+  }
+}
+const addComponent = (item) => {
+  const clone = cloneComponent(item);
+  drawingList.push(clone);
+  activeFormItem(clone);
+  if (clone._config_.layout !== 'rowItem') {
+    validateForm[tempActiveData.value._config_.formId] = tempActiveData.value._config_.defaultValue;
   }
 }
 const cloneComponent = (item) => {
@@ -184,21 +211,85 @@ const tagChange = (target) => {
   activeData.value._config_.tag = target._config_.tag;
   activeData.value._config_.type = target._config_.type;
 }
-const excObj = {
-  excrun: () => {
+const generateCode = (formData, type) => {
+  const html = vueTemplate(makeUpHtml(formData, type));
+  const js = vueScript(makeUpJs(formData, type));
+  const css = cssStyle(makeUpCss(formData));
+  return beautify.html(html + js + css, beautifierConf.html);
+}
+const execObj = {
+  execrun: (data) => {
     assembleFormData();
+    generateConf.value = data;
     drawerVisible.value = true;
+  },
+  execdownload: (data) => {
+    assembleFormData();
+    generateConf.value = data;
+    const codeStr = generateCode(formData.value, data.type);
+    const blob = new Blob([codeStr], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, data.fileName)
+  },
+  execcopy: (data) => {
+    assembleFormData();
+    generateConf.value = data;
+    document.querySelector('#copyNode').click();
   }
 }
 const run = () => {
   dialogVisible.value = true;
+  showFileName.value = false;
   operationType.value = 'run';
 }
+const download = () => {
+  dialogVisible.value = true;
+  showFileName.value = true;
+  operationType.value = 'download';
+}
+const copy = () => {
+  dialogVisible.value = true;
+  showFileName.value = false;
+  operationType.value = 'copy';
+}
+const empty = () => {
+  ElMessageBox.confirm(
+    '确定要清空所有组件吗？',
+    '提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then((res) => {
+    drawingList.length = 0;
+    Object.keys(validateForm).forEach(item => {
+      delete validateForm[item];
+    })
+  }).catch(() => { })
+}
 const generate = (data) => {
-  const fnc = excObj[`exc${operationType.value}`];
+  const fnc = execObj[`exec${operationType.value}`];
   fnc && fnc(data)
 }
-
+onMounted(() => {
+  if (!clipboard) {
+    const clipboard = new ClipboardJS(document.querySelector('#copyNode'), {
+      text: trigger => {
+        ElNotification({
+          title: '成功',
+          message: '代码已复制到剪切板，可粘贴。',
+          type: 'success'
+        })
+        return generateCode(formData.value, generateConf.value.type);
+      }
+    })
+    clipboard.on('error', () => {
+      ElNotification({
+        title: '失败',
+        message: '代码复制失败',
+        type: 'error'
+      })
+    })
+  }
+})
 </script>
 <style lang='scss' scoped>
 @import '@/styles/home.scss';

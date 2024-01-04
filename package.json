@@ -14,6 +14,7 @@
     "core-js": "^3.8.3",
     "dayjs": "^1.11.10",
     "element-plus": "^2.4.3",
+    "file-saver": "^2.0.5",
     "js-beautify": "^1.14.11",
     "monaco-editor": "^0.45.0",
     "monaco-editor-webpack-plugin": "^7.1.0",

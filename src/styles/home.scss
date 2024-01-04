@@ -194,8 +194,10 @@ $lighterBlue: #409EFF;
     border: none;
   }
 
-  &:hover .el-form-item {
-    background-color: $selectedColor;
+  &:hover {
+    .el-form-item {
+      background-color: $selectedColor;
+    }
   }
 
   .el-form-item {
@@ -216,6 +218,7 @@ $lighterBlue: #409EFF;
 
   .el-button {
     color: #66b1ff;
+    margin: 0;
   }
 }
 
@@ -227,6 +230,7 @@ $lighterBlue: #409EFF;
     display: none;
   }
 
+  &:hover,
   &.active-from-item {
     >.drawing-item-icon {
       display: initial;
@@ -240,6 +244,7 @@ $lighterBlue: #409EFF;
       border-radius: 50%;
       text-align: center;
       cursor: pointer;
+
 
       &.drawing-item-delete {
         right: 24px;

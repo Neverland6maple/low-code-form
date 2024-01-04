@@ -2,22 +2,43 @@
   <div>
     <el-drawer v-bind="$attrs" :with-header="false" @open="onOpen" @close="onClose">
       <el-row style="height:100%;">
-        <el-col :span="12">
+        <el-col :md="24" :lg="12">
           <el-tabs type="card" class="editor-tabs" v-model="activeTab">
-            <el-tab-pane label="template" name="template"></el-tab-pane>
-            <el-tab-pane label="script" name="script"></el-tab-pane>
-            <el-tab-pane label="css" name="css"></el-tab-pane>
+            <el-tab-pane name="template">
+              <template #label>
+                <el-icon>
+                  <Edit />
+                </el-icon>
+                template
+              </template>
+            </el-tab-pane>
+            <el-tab-pane name="script">
+              <template #label>
+                <el-icon>
+                  <Document />
+                </el-icon>
+                script
+              </template>
+            </el-tab-pane>
+            <el-tab-pane name="css">
+              <template #label>
+                <el-icon>
+                  <Document />
+                </el-icon>
+                css
+              </template>
+            </el-tab-pane>
           </el-tabs>
           <div v-show="activeTab === 'template'" id="editorHtml" class="tab-editor" />
           <div v-show="activeTab === 'script'" id="editorJs" class="tab-editor" />
           <div v-show="activeTab === 'css'" id="editorCss" class="tab-editor" />
         </el-col>
-        <el-col :span="12" style="overflow: hidden;height:100vh;">
+        <el-col :md="24" :lg="12" style="overflow: hidden;height:100vh;">
           <div class="action-bar">
             <el-button text icon="view" @click="runCode">
               刷新
             </el-button>
-            <el-button text icon="view">
+            <el-button text icon="view" @click="exportFile">
               导出vue文件
             </el-button>
             <el-button text icon="view" class="copy-btn">
@@ -34,7 +55,7 @@
   </div>
 </template>
 <script setup>
-import { defineOptions, reactive, defineEmits, ref, toRaw, defineProps, onMounted } from 'vue';
+import { defineOptions, reactive, defineEmits, ref, toRaw, defineProps, onMounted, getCurrentInstance } from 'vue';
 import * as monaco from 'monaco-editor'
 import beautify from "js-beautify";
 import { beautifierConf } from '@/utils/index'
@@ -43,8 +64,9 @@ import { ElNotification } from 'element-plus'
 import { makeUpHtml, vueTemplate, vueScript, cssStyle } from '@/components/generator/html'
 import { makeUpJs } from '@/components/generator/js'
 import { makeUpCss } from '@/components/generator/css'
-import { generateCodeFrame } from '@vue/shared';
-const props = defineProps(['formData']);
+import { saveAs } from 'file-saver'
+const { proxy } = getCurrentInstance();
+const props = defineProps(['formData', 'generateConf']);
 const activeTab = ref('template')
 const editorObj = reactive({
   html: null,
@@ -70,7 +92,8 @@ const runCode = () => {
     data: {
       html: toRaw(editorObj.html).getValue(),
       js: toRaw(editorObj.js).getValue().replace('export default ', ''),
-      css: toRaw(editorObj.css).getValue()
+      css: toRaw(editorObj.css).getValue(),
+      generateConf: JSON.stringify(props.generateConf)
     }
   }
   previewPage.value.contentWindow.postMessage(postData, location.origin)
@@ -90,8 +113,7 @@ const setEditorValue = (type, id, lang, code) => {
 const generateCode = () => {
   const html = vueTemplate(toRaw(editorObj.html).getValue());
   const js = vueScript(toRaw(editorObj.js).getValue());
-  const css = toRaw(editorObj.css).getValue();
-  console.log(beautify.html(html + js + css, beautifierConf.html));
+  const css = cssStyle(toRaw(editorObj.css).getValue());
   return beautify.html(html + js + css, beautifierConf.html);
 }
 const onOpen = () => {
@@ -106,7 +128,6 @@ const onOpen = () => {
         return generateCode();
       }
     })
-
     clipboard.on('error', () => {
       ElNotification({
         title: '失败',
@@ -115,9 +136,9 @@ const onOpen = () => {
       })
     })
   }
-
-  htmlCode.value = makeUpHtml(props.formData)
-  jsCode.value = makeUpJs(props.formData);
+  const { type } = props.generateConf;
+  htmlCode.value = makeUpHtml(props.formData, type)
+  jsCode.value = makeUpJs(props.formData, type);
   cssCode.value = cssStyle(makeUpCss(props.formData));
 
   htmlCode.value = beautify.html(htmlCode.value, beautifierConf.html);
@@ -135,6 +156,23 @@ const onOpen = () => {
 const onClose = () => {
   // isInitcode.value = false;
 }
+const exportFile = () => {
+  proxy.$prompt('文件名：', '导出文件', {
+    closeOnClickModal: false,
+    inputPlaceholder: '请输入文件名',
+    inputValue: `${+ new Date()}.vue`,
+    callback: (value) => {
+      if (value.action === 'confirm') {
+        const codeStr = generateCode();
+        const blob = new Blob([codeStr], { type: 'text/plain;charset=urf-8' });
+        saveAs(blob, value.value)
+      }
+    }
+  })
+  // .then((value) => {
+  //   console.log(value);
+  // })
+}
 </script>
 <style scoped lang='scss'>
 .result-wrapper {
@@ -148,8 +186,38 @@ const onClose = () => {
   height: calc(100vh - 42px);
 }
 
-.editor-tabs {
+:deep(.editor-tabs) {
   height: 42px;
+  background-color: #121315;
+
+  .el-tabs__header {
+    border: none;
+  }
+
+  .el-tabs__nav {
+    border: none;
+  }
+
+  .el-tabs__item {
+    border: none;
+    color: #888a8e;
+    margin-right: 5px;
+    background-color: #363636;
+
+    .el-icon {
+      color: #a95812;
+      margin-right: 3px;
+    }
+
+    &.is-active {
+      background-color: #1e1e1e;
+      color: #fff;
+
+      .el-icon {
+        color: #f1fa8c;
+      }
+    }
+  }
 }
 
 :deep(.el-drawer__body) {

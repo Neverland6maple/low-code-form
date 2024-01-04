@@ -1,3 +1,14 @@
+const inheritAttrs = {
+  file: '',
+  dialog: 'inheritAttrs:false,',
+}
+const mixinMethod = {
+  'dialog': [
+    `onOpened(){},`,
+    `onClosed(){},`
+  ],
+}
+
 function buildAttributes(scheme, dataList, optionsList, methodList, timeList) {
   buildData(scheme, dataList, timeList)
 
@@ -104,12 +115,12 @@ function buildLimitTime(scheme, timeList, methodList) {
     return arr;
   },`)
   methodList.push(buildLimitTime)
-
 }
 
-function buildexport(data, options, methods, timeList) {
+function buildexport(data, options, methods, timeList, type) {
   return `export default {
-    props:['str'],
+    ${inheritAttrs[type]}
+    props:[],
     data(){
       return {
         formData:{
@@ -140,14 +151,13 @@ function buildexport(data, options, methods, timeList) {
   }`
 }
 
-export function makeUpJs(formConfig) {
+export function makeUpJs(formConfig, type) {
   const dataList = [];
   const optionsList = [];
-  const methodList = [];
+  const methodList = mixinMethod[type] || [];
   const timeList = [];
   formConfig.fields.forEach(el => {
     buildAttributes(el, dataList, optionsList, methodList, timeList)
   })
-
-  return buildexport(dataList.join('\n'), optionsList.join('\n'), methodList.join('\n'), timeList.join('\n'))
+  return buildexport(dataList.join('\n'), optionsList.join('\n'), methodList.join('\n'), timeList.join('\n'), type)
 }
