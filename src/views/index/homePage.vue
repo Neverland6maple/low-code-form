@@ -58,7 +58,8 @@
               :animation="340">
               <template #item="{ element, index }">
                 <draggable-item :currentItem="element" :index="index" :activeId="activeId" :list="drawingList"
-                  @activeItem="activeFormItem" @copyItem="copyItem" @deleteItem="deleteItem" :formConf="formConf" />
+                  @activeItem="activeFormItem" @copyItem="copyItem" @deleteItem="deleteItem" :formConf="formConf"
+                  :validateForm="validateForm" />
               </template>
             </draggable>
             <div class="empty-info" v-if="!drawingList.length">
@@ -128,7 +129,7 @@ const onEnd = (obj) => {
     activeData.value = tempActiveData.value;
     activeId.value = tempActiveData.value._config_.formId;
     if (tempActiveData.value._config_.layout !== 'rowItem') {
-      validateForm[tempActiveData.value._config_.formId] = tempActiveData.value._config_.defaultValue;
+      validateForm[tempActiveData.value._vModel_] = tempActiveData.value._config_.defaultValue;
     }
   }
 }
@@ -137,7 +138,7 @@ const addComponent = (item) => {
   drawingList.push(clone);
   activeFormItem(clone);
   if (clone._config_.layout !== 'rowItem') {
-    validateForm[tempActiveData.value._config_.formId] = tempActiveData.value._config_.defaultValue;
+    validateForm[tempActiveData.value._vModel_] = tempActiveData.value._config_.defaultValue;
   }
 }
 const cloneComponent = (item) => {
@@ -174,9 +175,13 @@ const copyItem = (item, list) => {
   const clone = cloneComponent(item);
   activeFormItem(clone);
   list.push(clone);
+  if (clone._config_.layout !== 'rowItem') {
+    validateForm[clone._vModel_] = clone._config_.defaultValue;
+  }
 }
 const deleteItem = (index, list) => {
-  list.splice(index, 1)
+  const item = list.splice(index, 1)[0]
+  delete validateForm[item._vModel_];
   if (list.length) {
     activeFormItem(list.at(-1));
   } else if (drawingList.length) {

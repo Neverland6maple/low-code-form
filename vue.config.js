@@ -41,8 +41,8 @@ module.exports = defineConfig({
     ]
     config.plugins.push(...plugins);
     config.externals = {
-      vue: 'Vue',
-      'element-plus': 'ElementPlus',
+      // vue: 'Vue',
+      // 'element-plus': 'ElementPlus',
     }
   },
   chainWebpack: config => {

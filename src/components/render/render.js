@@ -49,13 +49,14 @@ function mountSlotFiles(conf, children) {
   }
 }
 
-function vModel(target, defaultValue) {
+function vModel(target, defaultValue, fields, validateForm) {
   target.modelValue = defaultValue;
   target['onUpdate:modelValue'] = (event) => {
+    validateForm[fields] = event;
     this.$emit('update:modelValue', event)
   };
 }
-function buildDataObject(item) {
+function buildDataObject(item, validateForm) {
   const clone = {};
   if (item._config_.tag === 'el-upload' && item._config_.fileSize !== undefined) {
     clone['before-upload'] = (rawFile) => {
@@ -84,7 +85,7 @@ function buildDataObject(item) {
   }
   Object.keys(item).forEach(key => {
     if (key === '_vModel_' && item._vModel_ !== undefined) {
-      vModel.call(this, clone, item._config_.defaultValue);
+      vModel.call(this, clone, item._config_.defaultValue, item._vModel_, validateForm);
     } else if (key === 'disabled-hours' || key === 'disabled-minutes' || key === 'disabled-seconds') {
       clone[key] = () => {
         if (!(item._config_.defaultValue instanceof Date)) return;
@@ -137,10 +138,10 @@ function clearAttrs(obj) {
 
 export default {
   inheritAttrs: false,
-  props: ['item'],
+  props: ['item', 'validateForm'],
   render(context) {
     const children = {};
     mountSlotFiles(context.item, children);
-    return h(mapping[context.item._config_.tag], buildDataObject.call(context, context.item), children)
+    return h(mapping[context.item._config_.tag], buildDataObject.call(context, context.item, context.validateForm), children)
   }
 }

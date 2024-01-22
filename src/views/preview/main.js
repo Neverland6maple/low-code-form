@@ -1,5 +1,6 @@
 import { createApp, ref } from 'vue'
 import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import MyTinymce from '@/components/tinymce/MyTinymce.vue'
 

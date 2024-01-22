@@ -7,7 +7,9 @@ const layouts = {
     const tagDom = tags[scheme._config_.tag](scheme);
     const label = `label="${scheme._config_.showLabel ? scheme._config_.label : ''}"`;
     const labelWidth = `${scheme._config_.showLabel ? scheme._config_.labelWidth ? 'label-width="' + scheme._config_.labelWidth + 'px"' : '' : 'label-width=0px'}`;
-    let str = `<el-form-item ${label} ${labelWidth}>
+    const rules = (scheme._config_.regList && scheme._config_.regList.length > 0) ? `:rules="regFormat(rules.${scheme._vModel_},Array.isArray(formData.${scheme._vModel_}))"` : '';
+    const prop = `prop="${scheme._vModel_}"`
+    let str = `<el-form-item ${label} ${labelWidth} ${rules} ${prop}>
       ${tagDom}
     </el-form-item>`
     str = colWrapper(str, scheme);
@@ -178,12 +180,13 @@ function buildFormTemplate(scheme, child, type) {
   const size = `size="${scheme.size}"`;
   const labelPosition = `label-position="${scheme.labelPosition}"`;
   const disabled = scheme.disabled ? 'disabled' : '';
+  const model = `:model="formData"`
   if (someSpanIsNot24) {
     child = `<el-row>
       ${child}
     </el-row>`
   }
-  return `<el-form ${labelWidth} ${size} ${labelPosition} ${disabled} >
+  return `<el-form ${labelWidth} ${size} ${labelPosition} ${disabled} ${model}>
     ${child}
   </el-form>`
 }

@@ -237,7 +237,6 @@
             </el-button>
             <el-divider />
           </template>
-
           <template v-if="activeData._config_.tag === 'el-cascader'">
             <el-divider>选项</el-divider>
             <el-tree :data="activeData.options" :expand-on-click-node="false" draggable :render-content="renderContent" />
@@ -342,10 +341,20 @@
           <el-form-item label="是否必填" v-if="activeData._config_.required !== undefined">
             <el-switch v-model="activeData._config_.required" />
           </el-form-item>
-          <template>
+          <template v-if="activeData._config_.regList !== undefined">
             <el-divider>正则校验</el-divider>
-            <el-button text icon="CirclePlus" @click="activeData._slot_.default.push({ label: '', value: '' })"
-              class="add-options">
+            <div class="reg-item" v-for="(item, index) in activeData._config_.regList" :key="index">
+              <el-form-item label="表达式">
+                <el-input v-model="item.pattern" />
+              </el-form-item>
+              <el-form-item label="错误提示">
+                <el-input v-model="item.message" />
+              </el-form-item>
+              <el-icon @click="activeData._config_.regList.splice(index, 1)" class="close-btn">
+                <CircleCloseFilled />
+              </el-icon>
+            </div>
+            <el-button text icon="CirclePlus" @click="addReg" class="add-options">
               添加规则
             </el-button>
           </template>
@@ -536,6 +545,14 @@ const updateColorFormat = () => {
     props.activeData._config_.tag = 'el-color-picker'; //强制刷新
   })
 }
+const addReg = () => {
+  if (props.activeData._config_.tag.includes('input')) {
+    props.activeData._config_.regList.push({ pattern: '//', message: '', trigger: 'blur' })
+  } else {
+    props.activeData._config_.regList.push({ pattern: '//', message: '', trigger: 'change' })
+  }
+
+}
 watch(() => props.formConf, (val) => {
   setFormData(val);
 }, {
@@ -576,6 +593,8 @@ watch(() => props.formConf, (val) => {
 
 .right-scrollbar {
   padding: 12px 18px 15px 15px;
+  height: calc(100vh - 42px);
+  box-sizing: border-box;
 }
 
 .center-tabs {
@@ -592,5 +611,23 @@ watch(() => props.formConf, (val) => {
 
 :deep(.el-slider) {
   width: 92%;
+}
+
+.close-btn {
+  color: #c6c6c6;
+  font-size: 19px;
+  cursor: pointer;
+  position: absolute;
+  right: -6px;
+  top: -6px;
+}
+
+.reg-item {
+  position: relative;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  padding: 12px 8px 1px 0px;
+  margin-right: 4px;
+  margin-bottom: 14px;
 }
 </style>

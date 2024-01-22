@@ -9,8 +9,9 @@ const mixinMethod = {
   ],
 }
 
-function buildAttributes(scheme, dataList, optionsList, methodList, timeList) {
+function buildAttributes(scheme, dataList, optionsList, methodList, timeList, rulesList) {
   buildData(scheme, dataList, timeList)
+  buildRules(scheme, rulesList)
 
   if (['el-select'].includes(scheme._config_.tag)) {
     buildOptions(scheme, optionsList)
@@ -49,7 +50,10 @@ function buildAttributes(scheme, dataList, optionsList, methodList, timeList) {
     }`)
   }
 }
-
+function buildRules(scheme, rulesList) {
+  if (!scheme._config_.regList && scheme._config_.regList.length <= 0) return;
+  rulesList.push(`${scheme._vModel_}:${JSON.stringify(scheme._config_.regList)},`);
+}
 function buildData(scheme, dataList, timeList) {
   if (!scheme._vModel_) return;
   if (scheme._config_.tagIcon !== 'time') {
@@ -117,7 +121,7 @@ function buildLimitTime(scheme, timeList, methodList) {
   methodList.push(buildLimitTime)
 }
 
-function buildexport(data, options, methods, timeList, type) {
+function buildexport(data, options, methods, timeList, type, rules) {
   return `export default {
     ${inheritAttrs[type]}
     props:[],
@@ -129,6 +133,9 @@ function buildexport(data, options, methods, timeList, type) {
         timeData:{
           ${timeList}
         },
+        rules:{
+          ${rules}
+        }
         ${options}
       }
     },
@@ -138,6 +145,26 @@ function buildexport(data, options, methods, timeList, type) {
           console.log(this.key);
         }
       },
+      regFormat(arr,flag){
+        let rules = [];
+        if (flag) {
+          rules = arr.map(item => {
+            const last = item.pattern.lastIndexOf('/');
+            return {
+              validator: (rule, value, callback) => {
+                const reg = new RegExp(item.pattern.slice(1, last), item.pattern.slice(last + 1));
+                value.every(item => reg.test(item)) ? callback() : callback(false);
+              }, message: item.message, trigger: item.trigger
+            };
+          })
+        } else {
+          rules = arr.map(item => {
+            const last = item.pattern.lastIndexOf('/');
+            return { pattern: new RegExp(item.pattern.slice(1, last), item.pattern.slice(last + 1)), message: item.message, trigger: item.trigger };
+          })
+        }
+        return rules;
+      }
       ${methods}
     },
     created(){
@@ -156,8 +183,9 @@ export function makeUpJs(formConfig, type) {
   const optionsList = [];
   const methodList = mixinMethod[type] || [];
   const timeList = [];
+  const rulesList = [];
   formConfig.fields.forEach(el => {
-    buildAttributes(el, dataList, optionsList, methodList, timeList)
+    buildAttributes(el, dataList, optionsList, methodList, timeList, rulesList)
   })
-  return buildexport(dataList.join('\n'), optionsList.join('\n'), methodList.join('\n'), timeList.join('\n'), type)
+  return buildexport(dataList.join('\n'), optionsList.join('\n'), methodList.join('\n'), timeList.join('\n'), type, rulesList.join('\n'))
 }

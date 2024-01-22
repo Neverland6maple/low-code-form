@@ -10,7 +10,8 @@ export const inputComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
-      regList: [{ required: true, message: 'age is required', tigger: 'blur' }]
+      // regList: [{ required: true, message: 'age is required', tigger: 'blur' }]
+      regList: []
     },
     _slot_: {
       prepend: '',
@@ -36,6 +37,7 @@ export const inputComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     autosize: {
       minRows: 4,
@@ -59,6 +61,7 @@ export const inputComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     _slot_: {
       prepend: '',
@@ -86,6 +89,7 @@ export const inputComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     placeholder: '计数器',
     disabled: false,
@@ -123,6 +127,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     _slot_: {
       default: [
@@ -157,6 +162,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     options: [
       {
@@ -224,6 +230,7 @@ export const selectComponents = [
       showLabel: true,
       required: true,
       optionType: '',
+      regList: []
     },
     _slot_: {
       default: [
@@ -255,6 +262,7 @@ export const selectComponents = [
       showLabel: true,
       required: true,
       optionType: '',
+      regList: []
     },
     _slot_: {
       default: [
@@ -287,6 +295,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     'active-text': '',
     'inactive-text': '',
@@ -308,6 +317,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: [],
     },
     min: 0,
     max: 100,
@@ -326,6 +336,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     placeholder: '请选择日期选择',
     'disabled-hours': [0, 23],
@@ -346,6 +357,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     'start-placeholder': '开始时间',
     'end-placeholder': '结束结束',
@@ -366,6 +378,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     type: 'date',
     placeholder: '请选择日期选择',
@@ -386,6 +399,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     type: "daterange",
     'range-separator': '至',
@@ -408,6 +422,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     max: 5,
     'allow-half': false,
@@ -424,6 +439,7 @@ export const selectComponents = [
       labelWidth: null,
       showLabel: true,
       required: true,
+      regList: []
     },
     'color-format': '',
     'show-alpha': false,
