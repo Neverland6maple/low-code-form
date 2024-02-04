@@ -206,21 +206,30 @@ $lighterBlue: #409EFF;
   }
 }
 
-.action-bar {
+.top-bar {
   height: 42px;
   border-bottom: 1px solid #f1e8e8;
   border-right: 1px solid #f1e8e8;
   box-sizing: border-box;
   display: flex;
-  justify-content: right;
+  justify-content: space-between;
   align-items: center;
   padding: 0 15px;
 
-  .el-button {
-    color: #66b1ff;
-    margin: 0;
+  .user-bar {}
+
+  .action-bar {
+
+    .el-button {
+      color: #66b1ff;
+      margin: 0;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
   }
 }
+
+
 
 :deep(.drawing-item),
 :deep(.drawing-row-item) {

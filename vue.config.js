@@ -26,6 +26,12 @@ module.exports = defineConfig({
       template: 'public/preview.html',
       filename: 'preview.html',
       chunks: ['chunk-vendors', 'chunk-cmmon', 'preview'],
+    },
+    square: {
+      entry: 'src/views/square/main.js',
+      template: 'public/square.html',
+      filename: 'square.html',
+      chunks: ['chunk-vendors', 'chunk-cmmon', 'square'],
     }
   },
   configureWebpack: config => {

@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-vue-jsx": "^3.1.0",
-    "axios": "^1.6.2",
+    "axios": "^1.6.7",
     "clipboard": "^2.0.11",
     "core-js": "^3.8.3",
     "dayjs": "^1.11.10",
@@ -35,6 +35,7 @@
     "@vue/cli-service": "~5.0.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
+    "mockjs": "^1.1.0",
     "sass": "^1.32.7",
     "sass-loader": "^12.0.0",
     "svg-sprite-loader": "^6.0.11",

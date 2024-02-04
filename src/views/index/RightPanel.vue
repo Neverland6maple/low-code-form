@@ -390,6 +390,9 @@
           <el-form-item label="禁用表单">
             <el-switch v-model="formConf.disabled" />
           </el-form-item>
+          <el-form-item label="表单按钮">
+            <el-switch v-model="formConf.formBtns" />
+          </el-form-item>
           <el-form-item label="显示未选中组件边框">
             <el-switch v-model="formConf.unFocusedComponentBorder" />
           </el-form-item>

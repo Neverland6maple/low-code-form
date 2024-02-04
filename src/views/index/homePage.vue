@@ -30,30 +30,35 @@
       </el-scrollbar>
     </div>
     <div class="center-board">
-      <div class="action-bar">
-        <el-button text icon="VideoPlay" @click="run">
-          运行
-        </el-button>
-        <el-button text icon="view" @click="showJson">
-          查看JSON
-        </el-button>
-        <el-button text icon="Download" @click="download">
-          导出vue文件
-        </el-button>
-        <el-button text icon="DocumentCopy" @click="copy">
-          复制代码
-          <input id="copyNode" type="hidden">
-        </el-button>
-        <el-button text icon="Delete" @click="empty" style="color: #F56C6C;">
-          清空
-        </el-button>
+      <div class="top-bar">
+        <div class="user-bar">
+          <el-button @click="toSquare">123</el-button>
+        </div>
+        <div class="action-bar">
+          <el-button text icon="VideoPlay" @click="run">
+            运行
+          </el-button>
+          <el-button text icon="view" @click="showJson">
+            查看JSON
+          </el-button>
+          <el-button text icon="Download" @click="download">
+            导出vue文件
+          </el-button>
+          <el-button text icon="DocumentCopy" @click="copy">
+            复制代码
+            <input id="copyNode" type="hidden">
+          </el-button>
+          <el-button text icon="Delete" @click="empty" style="color: #F56C6C;">
+            清空
+          </el-button>
+        </div>
       </div>
+
       <el-scrollbar class="center-scrollbar">
         {{ validateForm }}
         <el-row class="center-board-row" :gutter="formConf.gutter">
           <el-form class="center-board-form" :model="validateForm" :size="formConf.size"
-            :label-positon="formConf.labelPosition" :disabled="formConf.disabled"
-            :label-width="formConf.labelWidth + 'px'">
+            :label-position="formConf.labelPosition" :disabled="formConf.disabled" :label-width="formConf.labelWidth">
             <draggable class="drawing-board" :list="drawingList" group="componentsGroup" item-key="center-components"
               :animation="340">
               <template #item="{ element, index }">
@@ -295,6 +300,9 @@ const empty = () => {
 const generate = (data) => {
   const fnc = execObj[`exec${operationType.value}`];
   fnc && fnc(data)
+}
+const toSquare = () => {
+  location.href = 'http://localhost:8080/square/#/';
 }
 onMounted(() => {
   if (!clipboard) {

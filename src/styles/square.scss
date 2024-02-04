@@ -1,0 +1,144 @@
+.contanier {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.left-board {
+  width: 350px;
+  background-color: var(--bg-color);
+  color: var(--font-color);
+  transition: all 1s;
+  box-sizing: border-box;
+  border-right: 2px solid var(--result-border-color);
+
+}
+
+.right-board {
+  flex: 1;
+  padding: 15px;
+}
+
+.result-tabs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid var(--result-border-color);
+}
+
+.result-list {
+  .result-item {
+    padding: 20px;
+    border-bottom: 3px solid var(--result-border-color);
+
+    &:hover {
+      background: radial-gradient(var(--result-border-color), white);
+    }
+
+    .result-title {
+      margin: 0;
+      color: var(--result-title-color);
+      cursor: pointer;
+    }
+
+    .result-intro {
+      margin: 5px 0;
+    }
+
+    .result-liked {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .result-update {
+      margin-left: 20px;
+    }
+
+    .result-others,
+    .result-tag {
+      display: flex;
+      align-items: center;
+    }
+
+    .result-tag {
+      margin-bottom: 1px;
+    }
+
+    .tag-item {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background-color: var(--tag-item-bg-color);
+      color: var(--tag-item-color);
+      margin-left: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .result-others {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--vice-font-color);
+    }
+  }
+}
+
+.result-pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.sort-button) {
+  margin-right: 14px;
+
+  .el-button {
+    background-color: var(--button-bg-color);
+    border: 2px solid var(--button-border-color);
+    color: var(--button-vice-color);
+    font-weight: 700;
+    vertical-align: baseline;
+    outline: none;
+    padding: 12px;
+    border-radius: 7px;
+
+    .el-icon--right {
+      color: var(--button-color);
+
+    }
+
+    .sort-button-main {
+      color: var(--button-color);
+
+    }
+  }
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-bottom: 2px solid black;
+  border-radius: 50%;
+  padding-bottom: 80px;
+
+  .user-block {
+    padding: 40px;
+  }
+
+  .user-name {
+    font-size: 20px;
+  }
+
+  .repository-button {
+    margin-top: 20px;
+  }
+}
+
+.action-block {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}

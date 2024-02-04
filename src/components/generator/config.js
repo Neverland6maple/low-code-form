@@ -511,6 +511,7 @@ export const formConf = {
   labelWidth: 100,
   span: 24,
   disabled: false,
+  formBtns: false,
   gutter: 15,
   unFocusedComponentBorder: false,
 }

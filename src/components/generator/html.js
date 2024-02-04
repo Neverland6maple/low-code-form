@@ -180,7 +180,10 @@ function buildFormTemplate(scheme, child, type) {
   const size = `size="${scheme.size}"`;
   const labelPosition = `label-position="${scheme.labelPosition}"`;
   const disabled = scheme.disabled ? 'disabled' : '';
-  const model = `:model="formData"`
+  const model = `:model="formData"`;
+  child = `${child}
+  ${buildFromBtns(scheme, type)}`;
+
   if (someSpanIsNot24) {
     child = `<el-row>
       ${child}
@@ -190,7 +193,15 @@ function buildFormTemplate(scheme, child, type) {
     ${child}
   </el-form>`
 }
-
+function buildFromBtns(scheme, type) {
+  if (scheme.formBtns && type === 'file') {
+    return `<el-form-item>
+    <el-button type="primary">提交</el-button>
+    <el-button>重置</el-button>
+  </el-form-item>`
+  }
+  return ``;
+}
 function colWrapper(str, scheme) {
   // if (someSpanIsNot24 || scheme._config_.span !== 24) {
   const span = `:span="${scheme._config_.span}"`
@@ -269,7 +280,7 @@ export function makeUpHtml(formConfig, type) {
   });
   const htmlStr = htmlList.join('\n');
   // console.log(htmlList);
-  let str = buildFormTemplate(formConfig, htmlStr);
+  let str = buildFormTemplate(formConfig, htmlStr, type);
   if (type === 'dialog') {
     str = buildDialog(str)
   }
